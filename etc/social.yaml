@@ -1,0 +1,33 @@
+Name: social.rpc
+ListenOn: 0.0.0.0:8082
+Timeout: 10000
+Etcd:
+  Hosts:
+    - ${ETCD_HOST}:${ETCD_PORT}
+  Key: social.rpc
+
+DataSource: host=${DB_HOST} port=${DB_PORT} user=${DB_USER} password=${DB_PASS} dbname=Ask sslmode=disable
+
+Mysql:
+  DataSource: host=${DB_HOST} port=${DB_PORT} user=${DB_USER} password=${DB_PASS} dbname=Ask sslmode=disable
+
+DB:
+  DataSource: host=${DB_HOST} port=${DB_PORT} user=${DB_USER} password=${DB_PASS} dbname=Ask sslmode=disable
+  MaxOpenConns: 10
+  MaxIdleConns: 100
+  MaxLifetime: 3600
+
+CacheRedis:
+  - Host: ${REDIS_HOST}:${REDIS_PORT}
+    Pass: ${REDIS_PASS}
+    Type: node
+
+BizRedis:
+  Host: ${REDIS_HOST}:${REDIS_PORT}
+  Pass: ${REDIS_PASS}
+  Type: node
+
+KqPusherConf:
+  Brokers:
+    - ${KAFKA_HOST}:${KAFKA_PORT}
+  Topic: thinktalk_social

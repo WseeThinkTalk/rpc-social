@@ -1,0 +1,21 @@
+Name: message.rpc
+ListenOn: 0.0.0.0:8085
+Etcd:
+  Hosts:
+  - ${ETCD_HOST}:${ETCD_PORT}
+  Key: message.rpc
+DB:
+  DataSource: host=${DB_HOST} port=${DB_PORT} user=${DB_USER} password=${DB_PASS} dbname=Ask sslmode=disable
+  MaxIdleConns: 10
+  MaxOpenConns: 100
+  ConnMaxLifetime: 3600
+BizRedis:
+  Host: ${REDIS_HOST}:${REDIS_PORT}
+  Pass: ${REDIS_PASS}
+  Type: node
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9104
+  Path: /metrics
+Telemetry:
+  Endpoint: http://127.0.0.1:14268/api/traces
