@@ -24,7 +24,13 @@ func NewAdminReplyListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ad
 	}
 }
 
-func (l *AdminReplyListLogic) AdminReplyList(in *social.AdminReplyListRequest) (*social.AdminReplyListResponse, error) {
+func (l *AdminReplyListLogic) AdminReplyList(in *social.AdminReplyListRequest) (resp *social.AdminReplyListResponse, err error) {
+	resp = new(social.AdminReplyListResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.ReplyListData)
+	resp.Data.Items = make([]*social.ReplyItem, 0)
+
 	if in.PageSize == 0 {
 		in.PageSize = types.DefaultPageSize
 	}
@@ -42,14 +48,8 @@ func (l *AdminReplyListLogic) AdminReplyList(in *social.AdminReplyListRequest) (
 		isEnd = true
 	}
 	if len(replies) == 0 {
-		return &social.AdminReplyListResponse{
-			Code: 200,
-			Msg:  "success",
-			Data: &social.ReplyListData{
-				Items: []*social.ReplyItem{},
-				IsEnd: true,
-			},
-		}, nil
+		resp.Data.IsEnd = true
+		return resp, nil
 	}
 
 	items := make([]*social.ReplyItem, 0, len(replies))
@@ -72,13 +72,8 @@ func (l *AdminReplyListLogic) AdminReplyList(in *social.AdminReplyListRequest) (
 		cursor = items[len(items)-1].ReplyId
 	}
 
-	return &social.AdminReplyListResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.ReplyListData{
-			Items:  items,
-			Cursor: cursor,
-			IsEnd:  isEnd,
-		},
-	}, nil
+	resp.Data.Items = items
+	resp.Data.Cursor = cursor
+	resp.Data.IsEnd = isEnd
+	return resp, nil
 }

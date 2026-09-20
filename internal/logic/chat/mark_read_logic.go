@@ -20,7 +20,11 @@ func NewMarkReadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarkRead
 	return &MarkReadLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
 }
 
-func (l *MarkReadLogic) MarkRead(in *social.ChatMarkReadRequest) (*social.ChatMarkReadResponse, error) {
+func (l *MarkReadLogic) MarkRead(in *social.ChatMarkReadRequest) (resp *social.ChatMarkReadResponse, err error) {
+	resp = new(social.ChatMarkReadResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+
 	if in.UserId == 0 {
 		return nil, code.UserIdEmpty
 	}
@@ -28,8 +32,5 @@ func (l *MarkReadLogic) MarkRead(in *social.ChatMarkReadRequest) (*social.ChatMa
 	_ = l.svcCtx.ConversationModel.ClearUnread(l.ctx, in.UserId, in.ConversationId)
 	_ = l.svcCtx.MessageModel.MarkReadByConversation(l.ctx, in.ConversationId, in.UserId)
 
-	return &social.ChatMarkReadResponse{
-		Code: 200,
-		Msg:  "success",
-	}, nil
+	return resp, nil
 }

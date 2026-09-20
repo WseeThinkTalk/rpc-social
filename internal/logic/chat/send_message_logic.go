@@ -23,7 +23,12 @@ func NewSendMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendM
 	return &SendMessageLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
 }
 
-func (l *SendMessageLogic) SendMessage(in *social.SendMessageRequest) (*social.SendMessageResponse, error) {
+func (l *SendMessageLogic) SendMessage(in *social.SendMessageRequest) (resp *social.SendMessageResponse, err error) {
+	resp = new(social.SendMessageResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.SendMessageData)
+
 	if in.SenderId == 0 {
 		return nil, code.SenderIdEmpty
 	}
@@ -57,8 +62,5 @@ func (l *SendMessageLogic) SendMessage(in *social.SendMessageRequest) (*social.S
 		})
 	}
 
-	return &social.SendMessageResponse{
-		Code: 200,
-		Msg:  "success",
-	}, nil
+	return resp, nil
 }

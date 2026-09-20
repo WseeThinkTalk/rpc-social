@@ -26,7 +26,13 @@ func NewNotificationListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 	}
 }
 
-func (l *NotificationListLogic) NotificationList(in *social.NotificationListRequest) (*social.NotificationListResponse, error) {
+func (l *NotificationListLogic) NotificationList(in *social.NotificationListRequest) (resp *social.NotificationListResponse, err error) {
+	resp = new(social.NotificationListResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.NotificationListData)
+	resp.Data.Items = make([]*social.NotificationItem, 0)
+
 	if in.UserId == 0 {
 		return nil, code.UserIdEmpty
 	}
@@ -53,14 +59,8 @@ func (l *NotificationListLogic) NotificationList(in *social.NotificationListRequ
 		isEnd = true
 	}
 	if len(notifs) == 0 {
-		return &social.NotificationListResponse{
-			Code: 200,
-			Msg:  "success",
-			Data: &social.NotificationListData{
-				Items: []*social.NotificationItem{},
-				IsEnd: true,
-			},
-		}, nil
+		resp.Data.IsEnd = true
+		return resp, nil
 	}
 
 	items := make([]*social.NotificationItem, 0, len(notifs))
@@ -78,14 +78,8 @@ func (l *NotificationListLogic) NotificationList(in *social.NotificationListRequ
 		})
 	}
 
-	cursor := notifs[len(notifs)-1].ID
-	return &social.NotificationListResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.NotificationListData{
-			Items:  items,
-			Cursor: cursor,
-			IsEnd:  isEnd,
-		},
-	}, nil
+	resp.Data.Items = items
+	resp.Data.Cursor = notifs[len(notifs)-1].ID
+	resp.Data.IsEnd = isEnd
+	return resp, nil
 }

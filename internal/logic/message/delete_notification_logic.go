@@ -24,7 +24,11 @@ func NewDeleteNotificationLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 	}
 }
 
-func (l *DeleteNotificationLogic) DeleteNotification(in *social.DeleteNotificationRequest) (*social.DeleteNotificationResponse, error) {
+func (l *DeleteNotificationLogic) DeleteNotification(in *social.DeleteNotificationRequest) (resp *social.DeleteNotificationResponse, err error) {
+	resp = new(social.DeleteNotificationResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+
 	if in.UserId == 0 {
 		return nil, code.UserIdEmpty
 	}
@@ -46,8 +50,5 @@ func (l *DeleteNotificationLogic) DeleteNotification(in *social.DeleteNotificati
 		return nil, err
 	}
 
-	return &social.DeleteNotificationResponse{
-		Code: 200,
-		Msg:  "success",
-	}, nil
+	return resp, nil
 }

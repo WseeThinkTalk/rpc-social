@@ -24,19 +24,20 @@ func NewMarkAllReadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarkA
 	}
 }
 
-func (l *MarkAllReadLogic) MarkAllRead(in *social.MarkAllReadRequest) (*social.MarkAllReadResponse, error) {
+func (l *MarkAllReadLogic) MarkAllRead(in *social.MarkAllReadRequest) (resp *social.MarkAllReadResponse, err error) {
+	resp = new(social.MarkAllReadResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+
 	if in.UserId == 0 {
 		return nil, code.UserIdEmpty
 	}
 
-	err := l.svcCtx.NotificationModel.UpdateAllRead(l.ctx, in.UserId, in.Type)
+	err = l.svcCtx.NotificationModel.UpdateAllRead(l.ctx, in.UserId, in.Type)
 	if err != nil {
 		l.Errorf("[MarkAllRead] UpdateAllRead err: %v userId: %d type: %d", err, in.UserId, in.Type)
 		return nil, err
 	}
 
-	return &social.MarkAllReadResponse{
-		Code: 200,
-		Msg:  "success",
-	}, nil
+	return resp, nil
 }

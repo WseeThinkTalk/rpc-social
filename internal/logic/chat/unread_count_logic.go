@@ -20,7 +20,12 @@ func NewUnreadCountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Unrea
 	return &UnreadCountLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
 }
 
-func (l *UnreadCountLogic) UnreadCount(in *social.ChatUnreadCountRequest) (*social.ChatUnreadCountResponse, error) {
+func (l *UnreadCountLogic) UnreadCount(in *social.ChatUnreadCountRequest) (resp *social.ChatUnreadCountResponse, err error) {
+	resp = new(social.ChatUnreadCountResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.ChatUnreadCountData)
+
 	if in.UserId == 0 {
 		return nil, code.UserIdEmpty
 	}
@@ -31,11 +36,6 @@ func (l *UnreadCountLogic) UnreadCount(in *social.ChatUnreadCountRequest) (*soci
 		return nil, err
 	}
 
-	return &social.ChatUnreadCountResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.ChatUnreadCountData{
-			Total: total,
-		},
-	}, nil
+	resp.Data.Total = total
+	return resp, nil
 }

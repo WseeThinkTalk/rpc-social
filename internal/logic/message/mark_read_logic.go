@@ -24,7 +24,11 @@ func NewMarkReadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarkRead
 	}
 }
 
-func (l *MarkReadLogic) MarkRead(in *social.MarkReadRequest) (*social.MarkReadResponse, error) {
+func (l *MarkReadLogic) MarkRead(in *social.MarkReadRequest) (resp *social.MarkReadResponse, err error) {
+	resp = new(social.MarkReadResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+
 	if in.UserId == 0 {
 		return nil, code.UserIdEmpty
 	}
@@ -47,8 +51,5 @@ func (l *MarkReadLogic) MarkRead(in *social.MarkReadRequest) (*social.MarkReadRe
 		return nil, err
 	}
 
-	return &social.MarkReadResponse{
-		Code: 200,
-		Msg:  "success",
-	}, nil
+	return resp, nil
 }

@@ -27,7 +27,11 @@ func NewCancelConcernedLogic(ctx context.Context, svcCtx *svc.ServiceContext) *C
 	}
 }
 
-func (l *CancelConcernedLogic) CancelConcerned(in *social.CancelConcernedRequest) (*social.CancelConcernedResponse, error) {
+func (l *CancelConcernedLogic) CancelConcerned(in *social.CancelConcernedRequest) (resp *social.CancelConcernedResponse, err error) {
+	resp = new(social.CancelConcernedResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+
 	if in.BizId == "" {
 		return nil, code.BizIdEmpty
 	}
@@ -59,8 +63,5 @@ func (l *CancelConcernedLogic) CancelConcerned(in *social.CancelConcernedRequest
 		})
 	}
 
-	return &social.CancelConcernedResponse{
-		Code: 200,
-		Msg:  "success",
-	}, nil
+	return resp, nil
 }

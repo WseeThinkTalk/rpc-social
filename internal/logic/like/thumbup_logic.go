@@ -26,7 +26,14 @@ func NewThumbupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ThumbupLo
 	}
 }
 
-func (l *ThumbupLogic) Thumbup(in *social.ThumbupRequest) (*social.ThumbupResponse, error) {
+func (l *ThumbupLogic) Thumbup(in *social.ThumbupRequest) (resp *social.ThumbupResponse, err error) {
+	resp = new(social.ThumbupResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.ThumbupData)
+	resp.Data.BizId = in.BizId
+	resp.Data.ObjId = in.ObjId
+
 	msg := &types.ThumbupMsg{
 		BizId:    in.BizId,
 		ObjId:    in.ObjId,
@@ -49,12 +56,5 @@ func (l *ThumbupLogic) Thumbup(in *social.ThumbupRequest) (*social.ThumbupRespon
 		})
 	}
 
-	return &social.ThumbupResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.ThumbupData{
-			BizId: in.BizId,
-			ObjId: in.ObjId,
-		},
-	}, nil
+	return resp, nil
 }

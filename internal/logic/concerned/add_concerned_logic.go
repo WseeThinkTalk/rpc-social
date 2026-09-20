@@ -27,7 +27,11 @@ func NewAddConcernedLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddC
 	}
 }
 
-func (l *AddConcernedLogic) AddConcerned(in *social.AddConcernedRequest) (*social.AddConcernedResponse, error) {
+func (l *AddConcernedLogic) AddConcerned(in *social.AddConcernedRequest) (resp *social.AddConcernedResponse, err error) {
+	resp = new(social.AddConcernedResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+
 	if in.BizId == "" {
 		return nil, code.BizIdEmpty
 	}
@@ -59,8 +63,5 @@ func (l *AddConcernedLogic) AddConcerned(in *social.AddConcernedRequest) (*socia
 		})
 	}
 
-	return &social.AddConcernedResponse{
-		Code: 200,
-		Msg:  "success",
-	}, nil
+	return resp, nil
 }

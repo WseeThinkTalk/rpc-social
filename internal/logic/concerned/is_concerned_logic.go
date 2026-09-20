@@ -25,7 +25,12 @@ func NewIsConcernedLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IsCon
 	}
 }
 
-func (l *IsConcernedLogic) IsConcerned(in *social.IsConcernedRequest) (*social.IsConcernedResponse, error) {
+func (l *IsConcernedLogic) IsConcerned(in *social.IsConcernedRequest) (resp *social.IsConcernedResponse, err error) {
+	resp = new(social.IsConcernedResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.IsConcernedData)
+
 	if in.BizId == "" {
 		return nil, code.BizIdEmpty
 	}
@@ -42,12 +47,6 @@ func (l *IsConcernedLogic) IsConcerned(in *social.IsConcernedRequest) (*social.I
 		return nil, err
 	}
 
-	isConcerned := record != nil && record.Status == types.StatusConcerned
-	return &social.IsConcernedResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.IsConcernedData{
-			IsConcerned: isConcerned,
-		},
-	}, nil
+	resp.Data.IsConcerned = record != nil && record.Status == types.StatusConcerned
+	return resp, nil
 }

@@ -27,7 +27,13 @@ func NewReplyListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ReplyLi
 	}
 }
 
-func (l *ReplyListLogic) ReplyList(in *social.ReplyListRequest) (*social.ReplyListResponse, error) {
+func (l *ReplyListLogic) ReplyList(in *social.ReplyListRequest) (resp *social.ReplyListResponse, err error) {
+	resp = new(social.ReplyListResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.ReplyListData)
+	resp.Data.Items = make([]*social.ReplyItem, 0)
+
 	if in.BizId == "" {
 		return nil, code.BizIdEmpty
 	}
@@ -58,14 +64,8 @@ func (l *ReplyListLogic) ReplyList(in *social.ReplyListRequest) (*social.ReplyLi
 		isEnd = true
 	}
 	if len(roots) == 0 {
-		return &social.ReplyListResponse{
-			Code: 200,
-			Msg:  "success",
-			Data: &social.ReplyListData{
-				Items: []*social.ReplyItem{},
-				IsEnd: true,
-			},
-		}, nil
+		resp.Data.IsEnd = true
+		return resp, nil
 	}
 
 	// 2. 收集根评论 ID, 查询子回复
@@ -105,15 +105,10 @@ func (l *ReplyListLogic) ReplyList(in *social.ReplyListRequest) (*social.ReplyLi
 		cursor = roots[len(roots)-1].ID
 	}
 
-	return &social.ReplyListResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.ReplyListData{
-			Items:  items,
-			Cursor: cursor,
-			IsEnd:  isEnd,
-		},
-	}, nil
+	resp.Data.Items = items
+	resp.Data.Cursor = cursor
+	resp.Data.IsEnd = isEnd
+	return resp, nil
 }
 
 func (l *ReplyListLogic) toReplyItem(r *model.Reply) *social.ReplyItem {

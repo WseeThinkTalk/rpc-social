@@ -24,27 +24,26 @@ func NewIsThumbupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IsThumb
 	}
 }
 
-func (l *IsThumbupLogic) IsThumbup(in *social.IsThumbupRequest) (*social.IsThumbupResponse, error) {
+func (l *IsThumbupLogic) IsThumbup(in *social.IsThumbupRequest) (resp *social.IsThumbupResponse, err error) {
+	resp = new(social.IsThumbupResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.IsThumbupData)
+	resp.Data.UserThumbups = make(map[int64]*social.UserThumbup)
+
 	record, err := l.svcCtx.LikeRecordModel.FindOneByBizIdObjIdUserId(l.ctx, in.BizId, in.TargetId, in.UserId)
 	if err != nil && err != model.ErrNotFound {
 		l.Errorf("[IsThumbup] find like record error: %v", err)
 		return nil, err
 	}
 
-	userThumbups := make(map[int64]*social.UserThumbup)
 	if record != nil {
-		userThumbups[in.TargetId] = &social.UserThumbup{
+		resp.Data.UserThumbups[in.TargetId] = &social.UserThumbup{
 			UserId:      record.UserId,
 			ThumbupTime: record.CreateTime.UnixMilli(),
 			LikeType:    int32(record.LikeType),
 		}
 	}
 
-	return &social.IsThumbupResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.IsThumbupData{
-			UserThumbups: userThumbups,
-		},
-	}, nil
+	return resp, nil
 }

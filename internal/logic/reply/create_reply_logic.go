@@ -27,7 +27,12 @@ func NewCreateReplyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 	}
 }
 
-func (l *CreateReplyLogic) CreateReply(in *social.CreateReplyRequest) (*social.CreateReplyResponse, error) {
+func (l *CreateReplyLogic) CreateReply(in *social.CreateReplyRequest) (resp *social.CreateReplyResponse, err error) {
+	resp = new(social.CreateReplyResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.CreateReplyData)
+
 	if in.BizId == "" {
 		return nil, code.BizIdEmpty
 	}
@@ -68,8 +73,5 @@ func (l *CreateReplyLogic) CreateReply(in *social.CreateReplyRequest) (*social.C
 		})
 	}
 
-	return &social.CreateReplyResponse{
-		Code: 200,
-		Msg:  "success",
-	}, nil
+	return resp, nil
 }

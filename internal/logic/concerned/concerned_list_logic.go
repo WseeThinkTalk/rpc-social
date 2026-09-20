@@ -26,7 +26,13 @@ func NewConcernedListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Con
 	}
 }
 
-func (l *ConcernedListLogic) ConcernedList(in *social.ConcernedListRequest) (*social.ConcernedListResponse, error) {
+func (l *ConcernedListLogic) ConcernedList(in *social.ConcernedListRequest) (resp *social.ConcernedListResponse, err error) {
+	resp = new(social.ConcernedListResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.ConcernedListData)
+	resp.Data.Items = make([]*social.ConcernedItem, 0)
+
 	if in.UserId == 0 {
 		return nil, code.UserIdEmpty
 	}
@@ -53,14 +59,8 @@ func (l *ConcernedListLogic) ConcernedList(in *social.ConcernedListRequest) (*so
 		isEnd = true
 	}
 	if len(records) == 0 {
-		return &social.ConcernedListResponse{
-			Code: 200,
-			Msg:  "success",
-			Data: &social.ConcernedListData{
-				Items: []*social.ConcernedItem{},
-				IsEnd: true,
-			},
-		}, nil
+		resp.Data.IsEnd = true
+		return resp, nil
 	}
 
 	items := make([]*social.ConcernedItem, 0, len(records))
@@ -73,14 +73,8 @@ func (l *ConcernedListLogic) ConcernedList(in *social.ConcernedListRequest) (*so
 		})
 	}
 
-	cursor := records[len(records)-1].ID
-	return &social.ConcernedListResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.ConcernedListData{
-			Items:  items,
-			Cursor: cursor,
-			IsEnd:  isEnd,
-		},
-	}, nil
+	resp.Data.Items = items
+	resp.Data.Cursor = records[len(records)-1].ID
+	resp.Data.IsEnd = isEnd
+	return resp, nil
 }

@@ -24,7 +24,12 @@ func NewConcernedCountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Co
 	}
 }
 
-func (l *ConcernedCountLogic) ConcernedCount(in *social.ConcernedCountRequest) (*social.ConcernedCountResponse, error) {
+func (l *ConcernedCountLogic) ConcernedCount(in *social.ConcernedCountRequest) (resp *social.ConcernedCountResponse, err error) {
+	resp = new(social.ConcernedCountResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.ConcernedCountData)
+
 	if in.BizId == "" {
 		return nil, code.BizIdEmpty
 	}
@@ -39,13 +44,8 @@ func (l *ConcernedCountLogic) ConcernedCount(in *social.ConcernedCountRequest) (
 			l.Errorf("[ConcernedCount] CountByUserId err: %v req: %+v", err, in)
 			return nil, err
 		}
-		return &social.ConcernedCountResponse{
-			Code: 200,
-			Msg:  "success",
-			Data: &social.ConcernedCountData{
-				ConcernedNum: count,
-			},
-		}, nil
+		resp.Data.ConcernedNum = count
+		return resp, nil
 	}
 
 	count, err := l.svcCtx.ConcernedCountModel.FindByBizIDAndObjID(l.ctx, in.BizId, in.ObjId)
@@ -58,11 +58,6 @@ func (l *ConcernedCountLogic) ConcernedCount(in *social.ConcernedCountRequest) (
 		num = int64(count.ConcernedNum)
 	}
 
-	return &social.ConcernedCountResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.ConcernedCountData{
-			ConcernedNum: num,
-		},
-	}, nil
+	resp.Data.ConcernedNum = num
+	return resp, nil
 }

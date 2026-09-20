@@ -24,7 +24,13 @@ func NewReplyDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Reply
 	}
 }
 
-func (l *ReplyDetailLogic) ReplyDetail(in *social.ReplyDetailRequest) (*social.ReplyDetailResponse, error) {
+func (l *ReplyDetailLogic) ReplyDetail(in *social.ReplyDetailRequest) (resp *social.ReplyDetailResponse, err error) {
+	resp = new(social.ReplyDetailResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.ReplyItem)
+	resp.Data.SubReplies = make([]*social.ReplyItem, 0)
+
 	if in.ReplyId == 0 {
 		return nil, code.ReplyNotFound
 	}
@@ -38,21 +44,15 @@ func (l *ReplyDetailLogic) ReplyDetail(in *social.ReplyDetailRequest) (*social.R
 		return nil, code.ReplyNotFound
 	}
 
-	item := &social.ReplyItem{
-		ReplyId:       reply.ID,
-		BizId:         reply.BizID,
-		TargetId:      reply.TargetID,
-		ReplyUserId:   reply.ReplyUserID,
-		BeReplyUserId: reply.BeReplyUserID,
-		ParentId:      reply.ParentID,
-		Content:       reply.Content,
-		LikeNum:       int64(reply.LikeNum),
-		CreateTime:    reply.CreateTime.Unix(),
-	}
+	resp.Data.ReplyId = reply.ID
+	resp.Data.BizId = reply.BizID
+	resp.Data.TargetId = reply.TargetID
+	resp.Data.ReplyUserId = reply.ReplyUserID
+	resp.Data.BeReplyUserId = reply.BeReplyUserID
+	resp.Data.ParentId = reply.ParentID
+	resp.Data.Content = reply.Content
+	resp.Data.LikeNum = int64(reply.LikeNum)
+	resp.Data.CreateTime = reply.CreateTime.Unix()
 
-	return &social.ReplyDetailResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: item,
-	}, nil
+	return resp, nil
 }

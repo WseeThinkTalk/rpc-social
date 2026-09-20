@@ -21,7 +21,13 @@ func NewConversationsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Con
 	return &ConversationsLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
 }
 
-func (l *ConversationsLogic) Conversations(in *social.ConversationsRequest) (*social.ConversationsResponse, error) {
+func (l *ConversationsLogic) Conversations(in *social.ConversationsRequest) (resp *social.ConversationsResponse, err error) {
+	resp = new(social.ConversationsResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.ConversationsData)
+	resp.Data.Items = make([]*social.ConversationItem, 0)
+
 	if in.UserId == 0 {
 		return nil, code.UserIdEmpty
 	}
@@ -42,14 +48,8 @@ func (l *ConversationsLogic) Conversations(in *social.ConversationsRequest) (*so
 		isEnd = true
 	}
 	if len(convs) == 0 {
-		return &social.ConversationsResponse{
-			Code: 200,
-			Msg:  "success",
-			Data: &social.ConversationsData{
-				Items: []*social.ConversationItem{},
-				IsEnd: true,
-			},
-		}, nil
+		resp.Data.IsEnd = true
+		return resp, nil
 	}
 
 	items := make([]*social.ConversationItem, 0, len(convs))
@@ -63,14 +63,8 @@ func (l *ConversationsLogic) Conversations(in *social.ConversationsRequest) (*so
 		})
 	}
 
-	cursor := convs[len(convs)-1].LastMessageTime.Unix()
-	return &social.ConversationsResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.ConversationsData{
-			Items:  items,
-			Cursor: cursor,
-			IsEnd:  isEnd,
-		},
-	}, nil
+	resp.Data.Items = items
+	resp.Data.Cursor = convs[len(convs)-1].LastMessageTime.Unix()
+	resp.Data.IsEnd = isEnd
+	return resp, nil
 }

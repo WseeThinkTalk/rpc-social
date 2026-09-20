@@ -24,7 +24,12 @@ func NewReplyCountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ReplyC
 	}
 }
 
-func (l *ReplyCountLogic) ReplyCount(in *social.ReplyCountRequest) (*social.ReplyCountResponse, error) {
+func (l *ReplyCountLogic) ReplyCount(in *social.ReplyCountRequest) (resp *social.ReplyCountResponse, err error) {
+	resp = new(social.ReplyCountResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.ReplyCountData)
+
 	if in.BizId == "" {
 		return nil, code.BizIdEmpty
 	}
@@ -44,12 +49,7 @@ func (l *ReplyCountLogic) ReplyCount(in *social.ReplyCountRequest) (*social.Repl
 		return nil, err
 	}
 
-	return &social.ReplyCountResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.ReplyCountData{
-			ReplyNum:     total,
-			ReplyRootNum: rootTotal,
-		},
-	}, nil
+	resp.Data.ReplyNum = total
+	resp.Data.ReplyRootNum = rootTotal
+	return resp, nil
 }

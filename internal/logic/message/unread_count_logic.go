@@ -24,7 +24,12 @@ func NewUnreadCountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Unrea
 	}
 }
 
-func (l *UnreadCountLogic) UnreadCount(in *social.UnreadCountRequest) (*social.UnreadCountResponse, error) {
+func (l *UnreadCountLogic) UnreadCount(in *social.UnreadCountRequest) (resp *social.UnreadCountResponse, err error) {
+	resp = new(social.UnreadCountResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.UnreadCountData)
+
 	if in.UserId == 0 {
 		return nil, code.UserIdEmpty
 	}
@@ -41,12 +46,7 @@ func (l *UnreadCountLogic) UnreadCount(in *social.UnreadCountRequest) (*social.U
 		return nil, err
 	}
 
-	return &social.UnreadCountResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.UnreadCountData{
-			Total:      total,
-			TypeCounts: typeCounts,
-		},
-	}, nil
+	resp.Data.Total = total
+	resp.Data.TypeCounts = typeCounts
+	return resp, nil
 }

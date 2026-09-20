@@ -20,7 +20,13 @@ func NewMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Messages
 	return &MessagesLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
 }
 
-func (l *MessagesLogic) Messages(in *social.MessagesRequest) (*social.MessagesResponse, error) {
+func (l *MessagesLogic) Messages(in *social.MessagesRequest) (resp *social.MessagesResponse, err error) {
+	resp = new(social.MessagesResponse)
+	resp.Code = 200
+	resp.Msg = "success"
+	resp.Data = new(social.MessagesData)
+	resp.Data.Items = make([]*social.MessageItem, 0)
+
 	if in.PageSize == 0 {
 		in.PageSize = types.DefaultPageSize
 	}
@@ -41,14 +47,8 @@ func (l *MessagesLogic) Messages(in *social.MessagesRequest) (*social.MessagesRe
 		isEnd = true
 	}
 	if len(msgs) == 0 {
-		return &social.MessagesResponse{
-			Code: 200,
-			Msg:  "success",
-			Data: &social.MessagesData{
-				Items: []*social.MessageItem{},
-				IsEnd: true,
-			},
-		}, nil
+		resp.Data.IsEnd = true
+		return resp, nil
 	}
 
 	items := make([]*social.MessageItem, 0, len(msgs))
@@ -65,14 +65,8 @@ func (l *MessagesLogic) Messages(in *social.MessagesRequest) (*social.MessagesRe
 		})
 	}
 
-	cursor := msgs[len(msgs)-1].ID
-	return &social.MessagesResponse{
-		Code: 200,
-		Msg:  "success",
-		Data: &social.MessagesData{
-			Items:  items,
-			Cursor: cursor,
-			IsEnd:  isEnd,
-		},
-	}, nil
+	resp.Data.Items = items
+	resp.Data.Cursor = msgs[len(msgs)-1].ID
+	resp.Data.IsEnd = isEnd
+	return resp, nil
 }
