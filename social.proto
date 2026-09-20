@@ -1,0 +1,451 @@
+syntax = "proto3";
+
+package social;
+option go_package = "./social";
+
+// --------------------------- 点赞服务 -----------------------------
+service Like {
+  rpc Thumbup(ThumbupRequest) returns (ThumbupResponse);
+  rpc IsThumbup(IsThumbupRequest) returns (IsThumbupResponse);
+}
+
+// --------------------------- 收藏服务 -----------------------------
+service Concerned {
+  rpc AddConcerned(AddConcernedRequest) returns (AddConcernedResponse);
+  rpc CancelConcerned(CancelConcernedRequest) returns (CancelConcernedResponse);
+  rpc IsConcerned(IsConcernedRequest) returns (IsConcernedResponse);
+  rpc ConcernedList(ConcernedListRequest) returns (ConcernedListResponse);
+  rpc ConcernedCount(ConcernedCountRequest) returns (ConcernedCountResponse);
+}
+
+// --------------------------- 评论服务 -----------------------------
+service Reply {
+  rpc CreateReply(CreateReplyRequest) returns (CreateReplyResponse);
+  rpc DeleteReply(DeleteReplyRequest) returns (DeleteReplyResponse);
+  rpc ReplyDetail(ReplyDetailRequest) returns (ReplyDetailResponse);
+  rpc ReplyList(ReplyListRequest) returns (ReplyListResponse);
+  rpc ReplyCount(ReplyCountRequest) returns (ReplyCountResponse);
+  rpc AdminReplyList(AdminReplyListRequest) returns (AdminReplyListResponse);
+}
+
+// --------------------------- 通知服务 -----------------------------
+service Message {
+  rpc NotificationList(NotificationListRequest) returns (NotificationListResponse);
+  rpc UnreadCount(UnreadCountRequest) returns (UnreadCountResponse);
+  rpc MarkRead(MarkReadRequest) returns (MarkReadResponse);
+  rpc MarkAllRead(MarkAllReadRequest) returns (MarkAllReadResponse);
+  rpc DeleteNotification(DeleteNotificationRequest) returns (DeleteNotificationResponse);
+}
+
+// --------------------------- 聊天服务 -----------------------------
+service Chat {
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+  rpc Conversations(ConversationsRequest) returns (ConversationsResponse);
+  rpc Messages(MessagesRequest) returns (MessagesResponse);
+  rpc MarkRead(ChatMarkReadRequest) returns (ChatMarkReadResponse);
+  rpc UnreadCount(ChatUnreadCountRequest) returns (ChatUnreadCountResponse);
+}
+
+// ==================== Like Messages ====================
+
+message ThumbupRequest {
+  string bizId = 1;
+  int64 objId = 2;
+  int64 userId = 3;
+  int32 likeType = 4;
+}
+
+message ThumbupData {
+  string bizId = 1;
+  int64 objId = 2;
+  int64 likeNum = 3;
+  int64 dislikeNum = 4;
+}
+
+message ThumbupResponse {
+  int64 code = 1;
+  string msg = 2;
+  ThumbupData data = 3;
+}
+
+message IsThumbupRequest {
+  string bizId = 1;
+  int64 targetId = 2;
+  int64 userId = 3;
+}
+
+message UserThumbup {
+  int64 userId = 1;
+  int64 thumbupTime = 2;
+  int32 likeType = 3;
+}
+
+message IsThumbupData {
+  map<int64, UserThumbup> userThumbups = 1;
+}
+
+message IsThumbupResponse {
+  int64 code = 1;
+  string msg = 2;
+  IsThumbupData data = 3;
+}
+
+// ==================== Concerned Messages ====================
+
+message AddConcernedRequest {
+  string bizId = 1;
+  int64 objId = 2;
+  int64 userId = 3;
+}
+
+message AddConcernedResponse {
+  int64 code = 1;
+  string msg = 2;
+}
+
+message CancelConcernedRequest {
+  string bizId = 1;
+  int64 objId = 2;
+  int64 userId = 3;
+}
+
+message CancelConcernedResponse {
+  int64 code = 1;
+  string msg = 2;
+}
+
+message IsConcernedRequest {
+  string bizId = 1;
+  int64 objId = 2;
+  int64 userId = 3;
+}
+
+message IsConcernedData {
+  bool isConcerned = 1;
+}
+
+message IsConcernedResponse {
+  int64 code = 1;
+  string msg = 2;
+  IsConcernedData data = 3;
+}
+
+message ConcernedListRequest {
+  int64 userId = 1;
+  string bizId = 2;
+  int64 cursor = 3;
+  int64 pageSize = 4;
+}
+
+message ConcernedItem {
+  int64 id = 1;
+  string bizId = 2;
+  int64 objId = 3;
+  int64 createTime = 4;
+}
+
+message ConcernedListData {
+  repeated ConcernedItem items = 1;
+  int64 cursor = 2;
+  bool isEnd = 3;
+}
+
+message ConcernedListResponse {
+  int64 code = 1;
+  string msg = 2;
+  ConcernedListData data = 3;
+}
+
+message ConcernedCountRequest {
+  string bizId = 1;
+  int64 objId = 2;
+}
+
+message ConcernedCountData {
+  int64 concernedNum = 1;
+}
+
+message ConcernedCountResponse {
+  int64 code = 1;
+  string msg = 2;
+  ConcernedCountData data = 3;
+}
+
+// ==================== Reply Messages ====================
+
+message CreateReplyRequest {
+  string bizId = 1;
+  int64 targetId = 2;
+  int64 replyUserId = 3;
+  int64 beReplyUserId = 4;
+  int64 parentId = 5;
+  string content = 6;
+}
+
+message CreateReplyData {
+  int64 replyId = 1;
+}
+
+message CreateReplyResponse {
+  int64 code = 1;
+  string msg = 2;
+  CreateReplyData data = 3;
+}
+
+message DeleteReplyRequest {
+  int64 replyId = 1;
+  int64 userId = 2;
+  bool isAdmin = 3;
+}
+
+message DeleteReplyResponse {
+  int64 code = 1;
+  string msg = 2;
+}
+
+message ReplyDetailRequest {
+  int64 replyId = 1;
+}
+
+message ReplyItem {
+  int64 replyId = 1;
+  string bizId = 2;
+  int64 targetId = 3;
+  int64 replyUserId = 4;
+  int64 beReplyUserId = 5;
+  int64 parentId = 6;
+  string content = 7;
+  int64 likeNum = 8;
+  int64 createTime = 9;
+  repeated ReplyItem subReplies = 10;
+}
+
+message ReplyDetailResponse {
+  int64 code = 1;
+  string msg = 2;
+  ReplyItem data = 3;
+}
+
+message ReplyListRequest {
+  string bizId = 1;
+  int64 targetId = 2;
+  int64 cursor = 3;
+  int64 pageSize = 4;
+  int32 sortType = 5;
+}
+
+message ReplyListData {
+  repeated ReplyItem items = 1;
+  int64 cursor = 2;
+  bool isEnd = 3;
+}
+
+message ReplyListResponse {
+  int64 code = 1;
+  string msg = 2;
+  ReplyListData data = 3;
+}
+
+message ReplyCountRequest {
+  string bizId = 1;
+  int64 targetId = 2;
+}
+
+message ReplyCountData {
+  int64 replyNum = 1;
+  int64 replyRootNum = 2;
+}
+
+message ReplyCountResponse {
+  int64 code = 1;
+  string msg = 2;
+  ReplyCountData data = 3;
+}
+
+message AdminReplyListRequest {
+  string keyword = 1;
+  int64 cursor = 2;
+  int64 pageSize = 3;
+}
+
+message AdminReplyListResponse {
+  int64 code = 1;
+  string msg = 2;
+  ReplyListData data = 3;
+}
+
+// ==================== Message (Notification) Messages ====================
+
+message DeleteNotificationRequest {
+  int64 userId = 1;
+  int64 notificationId = 2;
+}
+
+message DeleteNotificationResponse {
+  int64 code = 1;
+  string msg = 2;
+}
+
+message NotificationListRequest {
+  int64 userId = 1;
+  int64 cursor = 2;
+  int64 pageSize = 3;
+  int32 type = 4;
+}
+
+message NotificationItem {
+  int64 id = 1;
+  int32 type = 2;
+  string title = 3;
+  string content = 4;
+  int64 refId = 5;
+  string bizId = 6;
+  int64 triggerUserId = 7;
+  bool isRead = 8;
+  int64 createTime = 9;
+}
+
+message NotificationListData {
+  repeated NotificationItem items = 1;
+  int64 cursor = 2;
+  bool isEnd = 3;
+}
+
+message NotificationListResponse {
+  int64 code = 1;
+  string msg = 2;
+  NotificationListData data = 3;
+}
+
+message UnreadCountRequest {
+  int64 userId = 1;
+}
+
+message UnreadCountData {
+  int64 total = 1;
+  map<int32, int64> typeCounts = 2;
+}
+
+message UnreadCountResponse {
+  int64 code = 1;
+  string msg = 2;
+  UnreadCountData data = 3;
+}
+
+message MarkReadRequest {
+  int64 userId = 1;
+  int64 notificationId = 2;
+}
+
+message MarkReadResponse {
+  int64 code = 1;
+  string msg = 2;
+}
+
+message MarkAllReadRequest {
+  int64 userId = 1;
+  int32 type = 2;
+}
+
+message MarkAllReadResponse {
+  int64 code = 1;
+  string msg = 2;
+}
+
+// ==================== Chat Messages ====================
+
+message SendMessageRequest {
+  int64 senderId = 1;
+  int64 receiverId = 2;
+  string content = 3;
+  int32 msgType = 4;
+}
+
+message SendMessageData {
+  int64 messageId = 1;
+}
+
+message SendMessageResponse {
+  int64 code = 1;
+  string msg = 2;
+  SendMessageData data = 3;
+}
+
+message ConversationsRequest {
+  int64 userId = 1;
+  int64 cursor = 2;
+  int64 pageSize = 3;
+}
+
+message ConversationItem {
+  int64 id = 1;
+  int64 targetUserId = 2;
+  string lastMessage = 3;
+  int64 lastMessageTime = 4;
+  int64 unreadCount = 5;
+}
+
+message ConversationsData {
+  repeated ConversationItem items = 1;
+  int64 cursor = 2;
+  bool isEnd = 3;
+}
+
+message ConversationsResponse {
+  int64 code = 1;
+  string msg = 2;
+  ConversationsData data = 3;
+}
+
+message MessagesRequest {
+  int64 conversationId = 1;
+  int64 cursor = 2;
+  int64 pageSize = 3;
+}
+
+message MessageItem {
+  int64 id = 1;
+  int64 conversationId = 2;
+  int64 senderId = 3;
+  int64 receiverId = 4;
+  string content = 5;
+  int32 msgType = 6;
+  bool isRead = 7;
+  int64 createTime = 8;
+}
+
+message MessagesData {
+  repeated MessageItem items = 1;
+  int64 cursor = 2;
+  bool isEnd = 3;
+}
+
+message MessagesResponse {
+  int64 code = 1;
+  string msg = 2;
+  MessagesData data = 3;
+}
+
+message ChatMarkReadRequest {
+  int64 userId = 1;
+  int64 conversationId = 2;
+}
+
+message ChatMarkReadResponse {
+  int64 code = 1;
+  string msg = 2;
+}
+
+message ChatUnreadCountRequest {
+  int64 userId = 1;
+}
+
+message ChatUnreadCountData {
+  int64 total = 1;
+}
+
+message ChatUnreadCountResponse {
+  int64 code = 1;
+  string msg = 2;
+  ChatUnreadCountData data = 3;
+}

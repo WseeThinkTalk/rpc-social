@@ -1,0 +1,84 @@
+package replylogic
+
+import (
+	"context"
+
+	"rpc-social/internal/svc"
+	types "rpc-social/internal/types/reply"
+	"rpc-social/social"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type AdminReplyListLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logx.Logger
+}
+
+func NewAdminReplyListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AdminReplyListLogic {
+	return &AdminReplyListLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		Logger: logx.WithContext(ctx),
+	}
+}
+
+func (l *AdminReplyListLogic) AdminReplyList(in *social.AdminReplyListRequest) (*social.AdminReplyListResponse, error) {
+	if in.PageSize == 0 {
+		in.PageSize = types.DefaultPageSize
+	}
+
+	replies, err := l.svcCtx.ReplyModel.AdminFindAll(l.ctx, in.Keyword, in.Cursor, in.PageSize+1)
+	if err != nil {
+		l.Errorf("[AdminReplyList] AdminFindAll err: %v req: %+v", err, in)
+		return nil, err
+	}
+
+	var isEnd bool
+	if len(replies) > int(in.PageSize) {
+		replies = replies[:in.PageSize]
+	} else {
+		isEnd = true
+	}
+	if len(replies) == 0 {
+		return &social.AdminReplyListResponse{
+			Code: 200,
+			Msg:  "success",
+			Data: &social.ReplyListData{
+				Items: []*social.ReplyItem{},
+				IsEnd: true,
+			},
+		}, nil
+	}
+
+	items := make([]*social.ReplyItem, 0, len(replies))
+	for _, r := range replies {
+		items = append(items, &social.ReplyItem{
+			ReplyId:       r.ID,
+			BizId:         r.BizID,
+			TargetId:      r.TargetID,
+			ReplyUserId:   r.ReplyUserID,
+			BeReplyUserId: r.BeReplyUserID,
+			ParentId:      r.ParentID,
+			Content:       r.Content,
+			LikeNum:       int64(r.LikeNum),
+			CreateTime:    r.CreateTime.Unix(),
+		})
+	}
+
+	var cursor int64
+	if len(items) > 0 && !isEnd {
+		cursor = items[len(items)-1].ReplyId
+	}
+
+	return &social.AdminReplyListResponse{
+		Code: 200,
+		Msg:  "success",
+		Data: &social.ReplyListData{
+			Items:  items,
+			Cursor: cursor,
+			IsEnd:  isEnd,
+		},
+	}, nil
+}

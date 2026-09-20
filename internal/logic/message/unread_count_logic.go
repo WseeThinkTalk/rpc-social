@@ -1,0 +1,52 @@
+package messagelogic
+
+import (
+	"context"
+
+	"rpc-social/internal/svc"
+	"rpc-social/pkg/code"
+	"rpc-social/social"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type UnreadCountLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logx.Logger
+}
+
+func NewUnreadCountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UnreadCountLogic {
+	return &UnreadCountLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		Logger: logx.WithContext(ctx),
+	}
+}
+
+func (l *UnreadCountLogic) UnreadCount(in *social.UnreadCountRequest) (*social.UnreadCountResponse, error) {
+	if in.UserId == 0 {
+		return nil, code.UserIdEmpty
+	}
+
+	total, err := l.svcCtx.NotificationModel.CountUnread(l.ctx, in.UserId)
+	if err != nil {
+		l.Errorf("[UnreadCount] CountUnread err: %v userId: %d", err, in.UserId)
+		return nil, err
+	}
+
+	typeCounts, err := l.svcCtx.NotificationModel.CountUnreadByType(l.ctx, in.UserId)
+	if err != nil {
+		l.Errorf("[UnreadCount] CountUnreadByType err: %v userId: %d", err, in.UserId)
+		return nil, err
+	}
+
+	return &social.UnreadCountResponse{
+		Code: 200,
+		Msg:  "success",
+		Data: &social.UnreadCountData{
+			Total:      total,
+			TypeCounts: typeCounts,
+		},
+	}, nil
+}
