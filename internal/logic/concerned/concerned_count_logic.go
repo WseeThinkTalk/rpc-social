@@ -26,8 +26,6 @@ func NewConcernedCountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Co
 
 func (l *ConcernedCountLogic) ConcernedCount(in *social.ConcernedCountRequest) (resp *social.ConcernedCountResponse, err error) {
 	resp = new(social.ConcernedCountResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.ConcernedCountData)
 
 	if in.BizId == "" {

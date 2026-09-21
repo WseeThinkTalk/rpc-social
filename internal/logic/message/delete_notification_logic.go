@@ -26,8 +26,6 @@ func NewDeleteNotificationLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *DeleteNotificationLogic) DeleteNotification(in *social.DeleteNotificationRequest) (resp *social.DeleteNotificationResponse, err error) {
 	resp = new(social.DeleteNotificationResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 
 	if in.UserId == 0 {
 		resp.Code = int64(code.UserIdEmpty.Code())

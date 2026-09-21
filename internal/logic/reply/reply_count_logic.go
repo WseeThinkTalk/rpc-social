@@ -26,8 +26,6 @@ func NewReplyCountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ReplyC
 
 func (l *ReplyCountLogic) ReplyCount(in *social.ReplyCountRequest) (resp *social.ReplyCountResponse, err error) {
 	resp = new(social.ReplyCountResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.ReplyCountData)
 
 	if in.BizId == "" {

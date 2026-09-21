@@ -28,8 +28,6 @@ func NewConcernedListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Con
 
 func (l *ConcernedListLogic) ConcernedList(in *social.ConcernedListRequest) (resp *social.ConcernedListResponse, err error) {
 	resp = new(social.ConcernedListResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.ConcernedListData)
 	resp.Data.Items = make([]*social.ConcernedItem, 0)
 

@@ -26,8 +26,6 @@ func NewMarkAllReadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarkA
 
 func (l *MarkAllReadLogic) MarkAllRead(in *social.MarkAllReadRequest) (resp *social.MarkAllReadResponse, err error) {
 	resp = new(social.MarkAllReadResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 
 	if in.UserId == 0 {
 		resp.Code = int64(code.UserIdEmpty.Code())
