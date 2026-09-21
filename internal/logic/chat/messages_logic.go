@@ -51,17 +51,18 @@ func (l *MessagesLogic) Messages(in *social.MessagesRequest) (resp *social.Messa
 		return resp, nil
 	}
 
+	// 组装私信聊天消息列表数据
 	items := make([]*social.MessageItem, 0, len(msgs))
-	for _, m := range msgs {
+	for _, v := range msgs {
 		items = append(items, &social.MessageItem{
-			Id:             m.ID,
-			ConversationId: m.ConversationID,
-			SenderId:       m.SenderID,
-			ReceiverId:     m.ReceiverID,
-			Content:        m.Content,
-			MsgType:        int32(m.MsgType),
-			IsRead:         m.IsRead == 1,
-			CreateTime:     m.CreateTime.Unix(),
+			Id:             v.ID,
+			ConversationId: v.ConversationID,
+			SenderId:       v.SenderID,
+			ReceiverId:     v.ReceiverID,
+			Content:        v.Content,
+			MsgType:        int32(v.MsgType),
+			IsRead:         v.IsRead == 1,
+			CreateTime:     v.CreateTime.Unix(),
 		})
 	}
 

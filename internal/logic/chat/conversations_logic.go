@@ -53,14 +53,15 @@ func (l *ConversationsLogic) Conversations(in *social.ConversationsRequest) (res
 		return resp, nil
 	}
 
+	// 组装会话列表数据
 	items := make([]*social.ConversationItem, 0, len(convs))
-	for _, c := range convs {
+	for _, v := range convs {
 		items = append(items, &social.ConversationItem{
-			Id:              c.ID,
-			TargetUserId:    c.TargetUserID,
-			LastMessage:     c.LastMessage,
-			LastMessageTime: c.LastMessageTime.Unix(),
-			UnreadCount:     int64(c.UnreadCount),
+			Id:              v.ID,
+			TargetUserId:    v.TargetUserID,
+			LastMessage:     v.LastMessage,
+			LastMessageTime: v.LastMessageTime.Unix(),
+			UnreadCount:     int64(v.UnreadCount),
 		})
 	}
 

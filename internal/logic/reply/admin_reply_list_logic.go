@@ -53,17 +53,18 @@ func (l *AdminReplyListLogic) AdminReplyList(in *social.AdminReplyListRequest) (
 	}
 
 	items := make([]*social.ReplyItem, 0, len(replies))
-	for _, r := range replies {
+	// 转换评论数据模型为响应 DTO
+	for _, v := range replies {
 		items = append(items, &social.ReplyItem{
-			ReplyId:       r.ID,
-			BizId:         r.BizID,
-			TargetId:      r.TargetID,
-			ReplyUserId:   r.ReplyUserID,
-			BeReplyUserId: r.BeReplyUserID,
-			ParentId:      r.ParentID,
-			Content:       r.Content,
-			LikeNum:       int64(r.LikeNum),
-			CreateTime:    r.CreateTime.Unix(),
+			ReplyId:       v.ID,
+			BizId:         v.BizID,
+			TargetId:      v.TargetID,
+			ReplyUserId:   v.ReplyUserID,
+			BeReplyUserId: v.BeReplyUserID,
+			ParentId:      v.ParentID,
+			Content:       v.Content,
+			LikeNum:       int64(v.LikeNum),
+			CreateTime:    v.CreateTime.Unix(),
 		})
 	}
 

@@ -73,8 +73,8 @@ func (l *ReplyListLogic) ReplyList(in *social.ReplyListRequest) (resp *social.Re
 
 	// 2. 收集根评论 ID, 查询子回复
 	rootIds := make([]int64, len(roots))
-	for i, r := range roots {
-		rootIds[i] = r.ID
+	for i, v := range roots {
+		rootIds[i] = v.ID
 	}
 	subReplies, err := l.svcCtx.ReplyModel.FindByParentIDs(l.ctx, rootIds)
 	if err != nil {
@@ -85,16 +85,16 @@ func (l *ReplyListLogic) ReplyList(in *social.ReplyListRequest) (resp *social.Re
 
 	// 3. 构建 parentId → subReplies 映射
 	subMap := make(map[int64][]*social.ReplyItem)
-	for _, sub := range subReplies {
-		item := l.toReplyItem(sub)
-		subMap[sub.ParentID] = append(subMap[sub.ParentID], item)
+	for _, v := range subReplies {
+		item := l.toReplyItem(v)
+		subMap[v.ParentID] = append(subMap[v.ParentID], item)
 	}
 
-	// 4. 组装返回
+	// 4. 组装返回评论列表并挂载子评论
 	items := make([]*social.ReplyItem, 0, len(roots))
-	for _, root := range roots {
-		rootItem := l.toReplyItem(root)
-		if subs, ok := subMap[root.ID]; ok {
+	for _, v := range roots {
+		rootItem := l.toReplyItem(v)
+		if subs, ok := subMap[v.ID]; ok {
 			if len(subs) > types.MaxSubReplyCount {
 				subs = subs[:types.MaxSubReplyCount]
 			}

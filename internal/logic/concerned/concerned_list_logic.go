@@ -64,13 +64,14 @@ func (l *ConcernedListLogic) ConcernedList(in *social.ConcernedListRequest) (res
 		return resp, nil
 	}
 
+	// 组装关注动态记录列表数据
 	items := make([]*social.ConcernedItem, 0, len(records))
-	for _, r := range records {
+	for _, v := range records {
 		items = append(items, &social.ConcernedItem{
-			Id:         r.ID,
-			BizId:      r.BizID,
-			ObjId:      r.ObjID,
-			CreateTime: r.CreateTime.Unix(),
+			Id:         v.ID,
+			BizId:      v.BizID,
+			ObjId:      v.ObjID,
+			CreateTime: v.CreateTime.Unix(),
 		})
 	}
 

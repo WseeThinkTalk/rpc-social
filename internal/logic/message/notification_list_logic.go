@@ -64,18 +64,19 @@ func (l *NotificationListLogic) NotificationList(in *social.NotificationListRequ
 		return resp, nil
 	}
 
+	// 组装消息通知列表数据
 	items := make([]*social.NotificationItem, 0, len(notifs))
-	for _, n := range notifs {
+	for _, v := range notifs {
 		items = append(items, &social.NotificationItem{
-			Id:            n.ID,
-			Type:          n.Type,
-			Title:         n.Title,
-			Content:       n.Content,
-			RefId:         n.RefID,
-			BizId:         n.BizID,
-			TriggerUserId: n.TriggerUserID,
-			IsRead:        n.IsRead == 1,
-			CreateTime:    n.CreateTime.Unix(),
+			Id:            v.ID,
+			Type:          v.Type,
+			Title:         v.Title,
+			Content:       v.Content,
+			RefId:         v.RefID,
+			BizId:         v.BizID,
+			TriggerUserId: v.TriggerUserID,
+			IsRead:        v.IsRead == 1,
+			CreateTime:    v.CreateTime.Unix(),
 		})
 	}
 
