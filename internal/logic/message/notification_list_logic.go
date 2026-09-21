@@ -28,11 +28,15 @@ func NewNotificationListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 func (l *NotificationListLogic) NotificationList(in *social.NotificationListRequest) (resp *social.NotificationListResponse, err error) {
 	resp = new(social.NotificationListResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.NotificationListData)
 	resp.Data.Items = make([]*social.NotificationItem, 0)
 
 	if in.UserId == 0 {
-		return nil, code.UserIdEmpty
+		resp.Code = int64(code.UserIdEmpty.Code())
+		resp.Msg = code.UserIdEmpty.Message()
+		return resp, nil
 	}
 	if in.PageSize == 0 {
 		in.PageSize = types.DefaultPageSize
@@ -46,8 +50,9 @@ func (l *NotificationListLogic) NotificationList(in *social.NotificationListRequ
 
 	notifs, err := l.svcCtx.NotificationModel.FindByUserId(l.ctx, in.UserId, in.Type, in.Cursor, in.PageSize+1)
 	if err != nil {
-		l.Errorf("[NotificationList] FindByUserId err: %v userId: %d", err, in.UserId)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	var isEnd bool

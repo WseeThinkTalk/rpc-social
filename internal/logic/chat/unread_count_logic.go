@@ -22,16 +22,21 @@ func NewUnreadCountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Unrea
 
 func (l *UnreadCountLogic) UnreadCount(in *social.ChatUnreadCountRequest) (resp *social.ChatUnreadCountResponse, err error) {
 	resp = new(social.ChatUnreadCountResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.ChatUnreadCountData)
 
 	if in.UserId == 0 {
-		return nil, code.UserIdEmpty
+		resp.Code = int64(code.UserIdEmpty.Code())
+		resp.Msg = code.UserIdEmpty.Message()
+		return resp, nil
 	}
 
 	total, err := l.svcCtx.ConversationModel.CountUnread(l.ctx, in.UserId)
 	if err != nil {
-		l.Errorf("[UnreadCount] CountUnread err: %v userId: %d", err, in.UserId)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	resp.Data.Total = total

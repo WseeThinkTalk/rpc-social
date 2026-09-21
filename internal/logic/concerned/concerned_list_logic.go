@@ -28,11 +28,15 @@ func NewConcernedListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Con
 
 func (l *ConcernedListLogic) ConcernedList(in *social.ConcernedListRequest) (resp *social.ConcernedListResponse, err error) {
 	resp = new(social.ConcernedListResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.ConcernedListData)
 	resp.Data.Items = make([]*social.ConcernedItem, 0)
 
 	if in.UserId == 0 {
-		return nil, code.UserIdEmpty
+		resp.Code = int64(code.UserIdEmpty.Code())
+		resp.Msg = code.UserIdEmpty.Message()
+		return resp, nil
 	}
 	if in.PageSize == 0 {
 		in.PageSize = types.DefaultPageSize
@@ -46,8 +50,9 @@ func (l *ConcernedListLogic) ConcernedList(in *social.ConcernedListRequest) (res
 
 	records, err := l.svcCtx.ConcernedRecordModel.FindByUserId(l.ctx, in.UserId, in.BizId, in.Cursor, in.PageSize+1)
 	if err != nil {
-		l.Errorf("[ConcernedList] FindByUserId err: %v userId: %d", err, in.UserId)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	var isEnd bool

@@ -26,25 +26,33 @@ func NewReplyCountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ReplyC
 
 func (l *ReplyCountLogic) ReplyCount(in *social.ReplyCountRequest) (resp *social.ReplyCountResponse, err error) {
 	resp = new(social.ReplyCountResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.ReplyCountData)
 
 	if in.BizId == "" {
-		return nil, code.BizIdEmpty
+		resp.Code = int64(code.BizIdEmpty.Code())
+		resp.Msg = code.BizIdEmpty.Message()
+		return resp, nil
 	}
 	if in.TargetId == 0 {
-		return nil, code.TargetIdEmpty
+		resp.Code = int64(code.TargetIdEmpty.Code())
+		resp.Msg = code.TargetIdEmpty.Message()
+		return resp, nil
 	}
 
 	total, err := l.svcCtx.ReplyModel.CountByBizIDAndTargetID(l.ctx, in.BizId, in.TargetId)
 	if err != nil {
-		l.Errorf("[ReplyCount] CountByBizIDAndTargetID err: %v req: %+v", err, in)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	rootTotal, err := l.svcCtx.ReplyModel.CountRootByBizIDAndTargetID(l.ctx, in.BizId, in.TargetId)
 	if err != nil {
-		l.Errorf("[ReplyCount] CountRootByBizIDAndTargetID err: %v req: %+v", err, in)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	resp.Data.ReplyNum = total

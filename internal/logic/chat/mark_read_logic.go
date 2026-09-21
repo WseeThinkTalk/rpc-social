@@ -22,13 +22,25 @@ func NewMarkReadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarkRead
 
 func (l *MarkReadLogic) MarkRead(in *social.ChatMarkReadRequest) (resp *social.ChatMarkReadResponse, err error) {
 	resp = new(social.ChatMarkReadResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 
 	if in.UserId == 0 {
-		return nil, code.UserIdEmpty
+		resp.Code = int64(code.UserIdEmpty.Code())
+		resp.Msg = code.UserIdEmpty.Message()
+		return resp, nil
 	}
 
-	_ = l.svcCtx.ConversationModel.ClearUnread(l.ctx, in.UserId, in.ConversationId)
-	_ = l.svcCtx.MessageModel.MarkReadByConversation(l.ctx, in.ConversationId, in.UserId)
+	if err := l.svcCtx.ConversationModel.ClearUnread(l.ctx, in.UserId, in.ConversationId); err != nil {
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
+	}
+	if err := l.svcCtx.MessageModel.MarkReadByConversation(l.ctx, in.ConversationId, in.UserId); err != nil {
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
+	}
 
 	return resp, nil
 }

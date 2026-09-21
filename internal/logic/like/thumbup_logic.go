@@ -9,7 +9,6 @@ import (
 	"rpc-social/social"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/threading"
 )
 
 type ThumbupLogic struct {
@@ -28,6 +27,8 @@ func NewThumbupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ThumbupLo
 
 func (l *ThumbupLogic) Thumbup(in *social.ThumbupRequest) (resp *social.ThumbupResponse, err error) {
 	resp = new(social.ThumbupResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.ThumbupData)
 	resp.Data.BizId = in.BizId
 	resp.Data.ObjId = in.ObjId
@@ -40,18 +41,18 @@ func (l *ThumbupLogic) Thumbup(in *social.ThumbupRequest) (resp *social.ThumbupR
 	}
 
 	if l.svcCtx.KqPusherClient != nil {
-		threading.GoSafe(func() {
-			data, err := json.Marshal(msg)
-			if err != nil {
-				l.Errorf("[Thumbup] marshal msg: %v error: %v", msg, err)
-				return
-			}
+		data, err := json.Marshal(msg)
+		if err != nil {
+			resp.Code = 500
+			resp.Msg = err.Error()
+			return resp, nil
+		}
 
-			err = l.svcCtx.KqPusherClient.Push(context.Background(), string(data))
-			if err != nil {
-				l.Errorf("[Thumbup] kq push data: %s error: %v", data, err)
-			}
-		})
+		if err := l.svcCtx.KqPusherClient.Push(l.ctx, string(data)); err != nil {
+			resp.Code = 500
+			resp.Msg = err.Error()
+			return resp, nil
+		}
 	}
 
 	return resp, nil

@@ -26,6 +26,8 @@ func NewAdminReplyListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ad
 
 func (l *AdminReplyListLogic) AdminReplyList(in *social.AdminReplyListRequest) (resp *social.AdminReplyListResponse, err error) {
 	resp = new(social.AdminReplyListResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.ReplyListData)
 	resp.Data.Items = make([]*social.ReplyItem, 0)
 
@@ -35,8 +37,9 @@ func (l *AdminReplyListLogic) AdminReplyList(in *social.AdminReplyListRequest) (
 
 	replies, err := l.svcCtx.ReplyModel.AdminFindAll(l.ctx, in.Keyword, in.Cursor, in.PageSize+1)
 	if err != nil {
-		l.Errorf("[AdminReplyList] AdminFindAll err: %v req: %+v", err, in)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	var isEnd bool

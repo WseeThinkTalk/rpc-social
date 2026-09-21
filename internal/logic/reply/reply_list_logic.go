@@ -29,14 +29,20 @@ func NewReplyListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ReplyLi
 
 func (l *ReplyListLogic) ReplyList(in *social.ReplyListRequest) (resp *social.ReplyListResponse, err error) {
 	resp = new(social.ReplyListResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.ReplyListData)
 	resp.Data.Items = make([]*social.ReplyItem, 0)
 
 	if in.BizId == "" {
-		return nil, code.BizIdEmpty
+		resp.Code = int64(code.BizIdEmpty.Code())
+		resp.Msg = code.BizIdEmpty.Message()
+		return resp, nil
 	}
 	if in.TargetId == 0 {
-		return nil, code.TargetIdEmpty
+		resp.Code = int64(code.TargetIdEmpty.Code())
+		resp.Msg = code.TargetIdEmpty.Message()
+		return resp, nil
 	}
 	if in.PageSize == 0 {
 		in.PageSize = types.DefaultPageSize
@@ -48,8 +54,9 @@ func (l *ReplyListLogic) ReplyList(in *social.ReplyListRequest) (resp *social.Re
 	// 1. 查询根评论
 	roots, err := l.svcCtx.ReplyModel.FindRootReplies(l.ctx, in.BizId, in.TargetId, int(in.SortType), in.Cursor, in.PageSize+1)
 	if err != nil {
-		l.Errorf("[ReplyList] FindRootReplies err: %v req: %+v", err, in)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	var (
@@ -73,7 +80,9 @@ func (l *ReplyListLogic) ReplyList(in *social.ReplyListRequest) (resp *social.Re
 	}
 	subReplies, err := l.svcCtx.ReplyModel.FindByParentIDs(l.ctx, rootIds)
 	if err != nil {
-		l.Errorf("[ReplyList] FindByParentIDs err: %v rootIds: %v", err, rootIds)
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	// 3. 构建 parentId → subReplies 映射

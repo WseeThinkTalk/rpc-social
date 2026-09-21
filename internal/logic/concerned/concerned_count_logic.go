@@ -26,21 +26,28 @@ func NewConcernedCountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Co
 
 func (l *ConcernedCountLogic) ConcernedCount(in *social.ConcernedCountRequest) (resp *social.ConcernedCountResponse, err error) {
 	resp = new(social.ConcernedCountResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.ConcernedCountData)
 
 	if in.BizId == "" {
-		return nil, code.BizIdEmpty
+		resp.Code = int64(code.BizIdEmpty.Code())
+		resp.Msg = code.BizIdEmpty.Message()
+		return resp, nil
 	}
 	if in.ObjId == 0 {
-		return nil, code.ObjIdEmpty
+		resp.Code = int64(code.ObjIdEmpty.Code())
+		resp.Msg = code.ObjIdEmpty.Message()
+		return resp, nil
 	}
 
 	if in.ObjId < 0 {
 		userId := -in.ObjId
 		count, err := l.svcCtx.ConcernedRecordModel.CountByUserId(l.ctx, userId, in.BizId)
 		if err != nil {
-			l.Errorf("[ConcernedCount] CountByUserId err: %v req: %+v", err, in)
-			return nil, err
+			resp.Code = 500
+			resp.Msg = err.Error()
+			return resp, nil
 		}
 		resp.Data.ConcernedNum = count
 		return resp, nil
@@ -48,8 +55,9 @@ func (l *ConcernedCountLogic) ConcernedCount(in *social.ConcernedCountRequest) (
 
 	count, err := l.svcCtx.ConcernedCountModel.FindByBizIDAndObjID(l.ctx, in.BizId, in.ObjId)
 	if err != nil {
-		l.Errorf("[ConcernedCount] FindByBizIDAndObjID err: %v req: %+v", err, in)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 	var num int64
 	if count != nil {

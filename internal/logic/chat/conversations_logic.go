@@ -23,11 +23,15 @@ func NewConversationsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Con
 
 func (l *ConversationsLogic) Conversations(in *social.ConversationsRequest) (resp *social.ConversationsResponse, err error) {
 	resp = new(social.ConversationsResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.ConversationsData)
 	resp.Data.Items = make([]*social.ConversationItem, 0)
 
 	if in.UserId == 0 {
-		return nil, code.UserIdEmpty
+		resp.Code = int64(code.UserIdEmpty.Code())
+		resp.Msg = code.UserIdEmpty.Message()
+		return resp, nil
 	}
 	if in.PageSize == 0 {
 		in.PageSize = types.DefaultPageSize
@@ -35,8 +39,9 @@ func (l *ConversationsLogic) Conversations(in *social.ConversationsRequest) (res
 
 	convs, err := l.svcCtx.ConversationModel.FindByUserId(l.ctx, in.UserId, in.Cursor, in.PageSize+1)
 	if err != nil {
-		l.Errorf("[Conversations] FindByUserId err: %v userId: %d", err, in.UserId)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	var isEnd bool

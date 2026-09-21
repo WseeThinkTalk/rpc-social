@@ -26,20 +26,27 @@ func NewReplyDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Reply
 
 func (l *ReplyDetailLogic) ReplyDetail(in *social.ReplyDetailRequest) (resp *social.ReplyDetailResponse, err error) {
 	resp = new(social.ReplyDetailResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.ReplyItem)
 	resp.Data.SubReplies = make([]*social.ReplyItem, 0)
 
 	if in.ReplyId == 0 {
-		return nil, code.ReplyNotFound
+		resp.Code = int64(code.ReplyNotFound.Code())
+		resp.Msg = code.ReplyNotFound.Message()
+		return resp, nil
 	}
 
 	reply, err := l.svcCtx.ReplyModel.FindOne(l.ctx, in.ReplyId)
 	if err != nil {
-		l.Errorf("[ReplyDetail] ReplyModel.FindOne err: %v replyId: %d", err, in.ReplyId)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 	if reply == nil || reply.Status == 1 {
-		return nil, code.ReplyNotFound
+		resp.Code = int64(code.ReplyNotFound.Code())
+		resp.Msg = code.ReplyNotFound.Message()
+		return resp, nil
 	}
 
 	resp.Data.ReplyId = reply.ID

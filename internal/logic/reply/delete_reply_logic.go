@@ -10,7 +10,6 @@ import (
 	"rpc-social/social"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/threading"
 )
 
 type DeleteReplyLogic struct {
@@ -29,24 +28,35 @@ func NewDeleteReplyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delet
 
 func (l *DeleteReplyLogic) DeleteReply(in *social.DeleteReplyRequest) (resp *social.DeleteReplyResponse, err error) {
 	resp = new(social.DeleteReplyResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 
 	if in.ReplyId == 0 {
-		return nil, code.ReplyNotFound
+		resp.Code = int64(code.ReplyNotFound.Code())
+		resp.Msg = code.ReplyNotFound.Message()
+		return resp, nil
 	}
 	if in.UserId == 0 {
-		return nil, code.CannotDeleteReply
+		resp.Code = int64(code.CannotDeleteReply.Code())
+		resp.Msg = code.CannotDeleteReply.Message()
+		return resp, nil
 	}
 
 	reply, err := l.svcCtx.ReplyModel.FindOne(l.ctx, in.ReplyId)
 	if err != nil {
-		l.Errorf("[DeleteReply] ReplyModel.FindOne err: %v replyId: %d", err, in.ReplyId)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 	if reply == nil {
-		return nil, code.ReplyNotFound
+		resp.Code = int64(code.ReplyNotFound.Code())
+		resp.Msg = code.ReplyNotFound.Message()
+		return resp, nil
 	}
 	if !in.IsAdmin && reply.ReplyUserID != in.UserId {
-		return nil, code.CannotDeleteReply
+		resp.Code = int64(code.CannotDeleteReply.Code())
+		resp.Msg = code.CannotDeleteReply.Message()
+		return resp, nil
 	}
 
 	msg := &types.ReplyMsg{
@@ -56,17 +66,17 @@ func (l *DeleteReplyLogic) DeleteReply(in *social.DeleteReplyRequest) (resp *soc
 	}
 
 	if l.svcCtx.KqPusherClient != nil {
-		threading.GoSafe(func() {
-			data, err := json.Marshal(msg)
-			if err != nil {
-				l.Errorf("[DeleteReply] marshal msg: %v error: %v", msg, err)
-				return
-			}
-			err = l.svcCtx.KqPusherClient.Push(context.Background(), string(data))
-			if err != nil {
-				l.Errorf("[DeleteReply] kq push data: %s error: %v", data, err)
-			}
-		})
+		data, err := json.Marshal(msg)
+		if err != nil {
+			resp.Code = 500
+			resp.Msg = err.Error()
+			return resp, nil
+		}
+		if err := l.svcCtx.KqPusherClient.Push(l.ctx, string(data)); err != nil {
+			resp.Code = 500
+			resp.Msg = err.Error()
+			return resp, nil
+		}
 	}
 
 	return resp, nil

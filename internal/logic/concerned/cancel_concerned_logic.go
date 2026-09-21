@@ -10,7 +10,6 @@ import (
 	"rpc-social/social"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/threading"
 )
 
 type CancelConcernedLogic struct {
@@ -29,15 +28,23 @@ func NewCancelConcernedLogic(ctx context.Context, svcCtx *svc.ServiceContext) *C
 
 func (l *CancelConcernedLogic) CancelConcerned(in *social.CancelConcernedRequest) (resp *social.CancelConcernedResponse, err error) {
 	resp = new(social.CancelConcernedResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 
 	if in.BizId == "" {
-		return nil, code.BizIdEmpty
+		resp.Code = int64(code.BizIdEmpty.Code())
+		resp.Msg = code.BizIdEmpty.Message()
+		return resp, nil
 	}
 	if in.ObjId == 0 {
-		return nil, code.ObjIdEmpty
+		resp.Code = int64(code.ObjIdEmpty.Code())
+		resp.Msg = code.ObjIdEmpty.Message()
+		return resp, nil
 	}
 	if in.UserId == 0 {
-		return nil, code.UserIdEmpty
+		resp.Code = int64(code.UserIdEmpty.Code())
+		resp.Msg = code.UserIdEmpty.Message()
+		return resp, nil
 	}
 
 	msg := &types.ConcernedMsg{
@@ -48,17 +55,17 @@ func (l *CancelConcernedLogic) CancelConcerned(in *social.CancelConcernedRequest
 	}
 
 	if l.svcCtx.KqPusherClient != nil {
-		threading.GoSafe(func() {
-			data, err := json.Marshal(msg)
-			if err != nil {
-				l.Errorf("[CancelConcerned] marshal msg: %v error: %v", msg, err)
-				return
-			}
-			err = l.svcCtx.KqPusherClient.Push(context.Background(), string(data))
-			if err != nil {
-				l.Errorf("[CancelConcerned] kq push data: %s error: %v", data, err)
-			}
-		})
+		data, err := json.Marshal(msg)
+		if err != nil {
+			resp.Code = 500
+			resp.Msg = err.Error()
+			return resp, nil
+		}
+		if err := l.svcCtx.KqPusherClient.Push(l.ctx, string(data)); err != nil {
+			resp.Code = 500
+			resp.Msg = err.Error()
+			return resp, nil
+		}
 	}
 
 	return resp, nil

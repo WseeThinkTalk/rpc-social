@@ -22,6 +22,8 @@ func NewMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Messages
 
 func (l *MessagesLogic) Messages(in *social.MessagesRequest) (resp *social.MessagesResponse, err error) {
 	resp = new(social.MessagesResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.MessagesData)
 	resp.Data.Items = make([]*social.MessageItem, 0)
 
@@ -34,8 +36,9 @@ func (l *MessagesLogic) Messages(in *social.MessagesRequest) (resp *social.Messa
 
 	msgs, err := l.svcCtx.MessageModel.FindByConversationId(l.ctx, in.ConversationId, in.Cursor, in.PageSize+1)
 	if err != nil {
-		l.Errorf("[Messages] FindByConversationId err: %v convId: %d", err, in.ConversationId)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	var isEnd bool

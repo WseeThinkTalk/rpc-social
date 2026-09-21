@@ -26,22 +26,28 @@ func NewUnreadCountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Unrea
 
 func (l *UnreadCountLogic) UnreadCount(in *social.UnreadCountRequest) (resp *social.UnreadCountResponse, err error) {
 	resp = new(social.UnreadCountResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.UnreadCountData)
 
 	if in.UserId == 0 {
-		return nil, code.UserIdEmpty
+		resp.Code = int64(code.UserIdEmpty.Code())
+		resp.Msg = code.UserIdEmpty.Message()
+		return resp, nil
 	}
 
 	total, err := l.svcCtx.NotificationModel.CountUnread(l.ctx, in.UserId)
 	if err != nil {
-		l.Errorf("[UnreadCount] CountUnread err: %v userId: %d", err, in.UserId)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	typeCounts, err := l.svcCtx.NotificationModel.CountUnreadByType(l.ctx, in.UserId)
 	if err != nil {
-		l.Errorf("[UnreadCount] CountUnreadByType err: %v userId: %d", err, in.UserId)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	resp.Data.Total = total

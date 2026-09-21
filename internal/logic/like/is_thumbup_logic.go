@@ -26,13 +26,16 @@ func NewIsThumbupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IsThumb
 
 func (l *IsThumbupLogic) IsThumbup(in *social.IsThumbupRequest) (resp *social.IsThumbupResponse, err error) {
 	resp = new(social.IsThumbupResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 	resp.Data = new(social.IsThumbupData)
 	resp.Data.UserThumbups = make(map[int64]*social.UserThumbup)
 
 	record, err := l.svcCtx.LikeRecordModel.FindOneByBizIdObjIdUserId(l.ctx, in.BizId, in.TargetId, in.UserId)
 	if err != nil && err != model.ErrNotFound {
-		l.Errorf("[IsThumbup] find like record error: %v", err)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	if record != nil {

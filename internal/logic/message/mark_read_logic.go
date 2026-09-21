@@ -26,27 +26,37 @@ func NewMarkReadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarkRead
 
 func (l *MarkReadLogic) MarkRead(in *social.MarkReadRequest) (resp *social.MarkReadResponse, err error) {
 	resp = new(social.MarkReadResponse)
+	resp.Code = 200
+	resp.Msg = "success"
 
 	if in.UserId == 0 {
-		return nil, code.UserIdEmpty
+		resp.Code = int64(code.UserIdEmpty.Code())
+		resp.Msg = code.UserIdEmpty.Message()
+		return resp, nil
 	}
 	if in.NotificationId == 0 {
-		return nil, code.NotificationIdEmpty
+		resp.Code = int64(code.NotificationIdEmpty.Code())
+		resp.Msg = code.NotificationIdEmpty.Message()
+		return resp, nil
 	}
 
 	notif, err := l.svcCtx.NotificationModel.FindOne(l.ctx, in.NotificationId)
 	if err != nil {
-		l.Errorf("[MarkRead] FindOne err: %v notificationId: %d", err, in.NotificationId)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 	if notif == nil {
-		return nil, code.NotificationNotFound
+		resp.Code = int64(code.NotificationNotFound.Code())
+		resp.Msg = code.NotificationNotFound.Message()
+		return resp, nil
 	}
 
 	err = l.svcCtx.NotificationModel.UpdateRead(l.ctx, in.NotificationId, in.UserId)
 	if err != nil {
-		l.Errorf("[MarkRead] UpdateRead err: %v notificationId: %d", err, in.NotificationId)
-		return nil, err
+		resp.Code = 500
+		resp.Msg = err.Error()
+		return resp, nil
 	}
 
 	return resp, nil
