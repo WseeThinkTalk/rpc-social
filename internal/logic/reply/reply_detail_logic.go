@@ -26,8 +26,6 @@ func NewReplyDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Reply
 
 func (l *ReplyDetailLogic) ReplyDetail(in *social.ReplyDetailRequest) (resp *social.ReplyDetailResponse, err error) {
 	resp = new(social.ReplyDetailResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.ReplyItem)
 	resp.Data.SubReplies = make([]*social.ReplyItem, 0)
 

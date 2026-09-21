@@ -22,8 +22,6 @@ func NewUnreadCountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Unrea
 
 func (l *UnreadCountLogic) UnreadCount(in *social.ChatUnreadCountRequest) (resp *social.ChatUnreadCountResponse, err error) {
 	resp = new(social.ChatUnreadCountResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.ChatUnreadCountData)
 
 	if in.UserId == 0 {

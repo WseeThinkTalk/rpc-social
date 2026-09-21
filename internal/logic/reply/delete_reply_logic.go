@@ -29,8 +29,6 @@ func NewDeleteReplyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delet
 
 func (l *DeleteReplyLogic) DeleteReply(in *social.DeleteReplyRequest) (resp *social.DeleteReplyResponse, err error) {
 	resp = new(social.DeleteReplyResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 
 	if in.ReplyId == 0 {
 		return nil, code.ReplyNotFound

@@ -26,8 +26,6 @@ func NewAdminReplyListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ad
 
 func (l *AdminReplyListLogic) AdminReplyList(in *social.AdminReplyListRequest) (resp *social.AdminReplyListResponse, err error) {
 	resp = new(social.AdminReplyListResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.ReplyListData)
 	resp.Data.Items = make([]*social.ReplyItem, 0)
 

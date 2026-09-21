@@ -22,8 +22,6 @@ func NewMarkReadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarkRead
 
 func (l *MarkReadLogic) MarkRead(in *social.ChatMarkReadRequest) (resp *social.ChatMarkReadResponse, err error) {
 	resp = new(social.ChatMarkReadResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 
 	if in.UserId == 0 {
 		return nil, code.UserIdEmpty

@@ -25,8 +25,6 @@ func NewSendMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendM
 
 func (l *SendMessageLogic) SendMessage(in *social.SendMessageRequest) (resp *social.SendMessageResponse, err error) {
 	resp = new(social.SendMessageResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.SendMessageData)
 
 	if in.SenderId == 0 {

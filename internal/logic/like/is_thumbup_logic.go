@@ -26,8 +26,6 @@ func NewIsThumbupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IsThumb
 
 func (l *IsThumbupLogic) IsThumbup(in *social.IsThumbupRequest) (resp *social.IsThumbupResponse, err error) {
 	resp = new(social.IsThumbupResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.IsThumbupData)
 	resp.Data.UserThumbups = make(map[int64]*social.UserThumbup)
 

@@ -28,8 +28,6 @@ func NewNotificationListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 func (l *NotificationListLogic) NotificationList(in *social.NotificationListRequest) (resp *social.NotificationListResponse, err error) {
 	resp = new(social.NotificationListResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.NotificationListData)
 	resp.Data.Items = make([]*social.NotificationItem, 0)
 

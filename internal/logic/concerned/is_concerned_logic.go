@@ -27,8 +27,6 @@ func NewIsConcernedLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IsCon
 
 func (l *IsConcernedLogic) IsConcerned(in *social.IsConcernedRequest) (resp *social.IsConcernedResponse, err error) {
 	resp = new(social.IsConcernedResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.IsConcernedData)
 
 	if in.BizId == "" {

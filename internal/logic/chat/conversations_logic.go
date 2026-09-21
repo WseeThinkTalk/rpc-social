@@ -23,8 +23,6 @@ func NewConversationsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Con
 
 func (l *ConversationsLogic) Conversations(in *social.ConversationsRequest) (resp *social.ConversationsResponse, err error) {
 	resp = new(social.ConversationsResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.ConversationsData)
 	resp.Data.Items = make([]*social.ConversationItem, 0)
 

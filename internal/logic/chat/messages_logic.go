@@ -22,8 +22,6 @@ func NewMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Messages
 
 func (l *MessagesLogic) Messages(in *social.MessagesRequest) (resp *social.MessagesResponse, err error) {
 	resp = new(social.MessagesResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.MessagesData)
 	resp.Data.Items = make([]*social.MessageItem, 0)
 

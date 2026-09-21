@@ -29,8 +29,6 @@ func NewReplyListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ReplyLi
 
 func (l *ReplyListLogic) ReplyList(in *social.ReplyListRequest) (resp *social.ReplyListResponse, err error) {
 	resp = new(social.ReplyListResponse)
-	resp.Code = 200
-	resp.Msg = "success"
 	resp.Data = new(social.ReplyListData)
 	resp.Data.Items = make([]*social.ReplyItem, 0)
 
