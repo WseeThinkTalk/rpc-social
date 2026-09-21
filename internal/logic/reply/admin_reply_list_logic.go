@@ -1,6 +1,7 @@
 package replylogic
 
 import (
+	"rpc-social/pkg/code"
 	"context"
 
 	"rpc-social/internal/svc"
@@ -35,7 +36,7 @@ func (l *AdminReplyListLogic) AdminReplyList(in *social.AdminReplyListRequest) (
 
 	replies, err := l.svcCtx.ReplyModel.AdminFindAll(l.ctx, in.Keyword, in.Cursor, in.PageSize+1)
 	if err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}

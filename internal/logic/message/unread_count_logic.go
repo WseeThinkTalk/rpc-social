@@ -36,14 +36,14 @@ func (l *UnreadCountLogic) UnreadCount(in *social.UnreadCountRequest) (resp *soc
 
 	total, err := l.svcCtx.NotificationModel.CountUnread(l.ctx, in.UserId)
 	if err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}
 
 	typeCounts, err := l.svcCtx.NotificationModel.CountUnreadByType(l.ctx, in.UserId)
 	if err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}

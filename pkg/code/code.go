@@ -3,6 +3,10 @@ package code
 import "rpc-social/pkg/xcode"
 
 var (
+	// Common
+	ServerErr = xcode.ServerErr
+	NotFound  = xcode.NotFound
+
 	// Chat (10000+)
 	ChatSenderIdEmpty   = xcode.New(10001, "发送者ID不能为空")
 	ChatReceiverIdEmpty = xcode.New(10002, "接收者ID不能为空")

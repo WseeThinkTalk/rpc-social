@@ -40,7 +40,7 @@ func (l *DeleteNotificationLogic) DeleteNotification(in *social.DeleteNotificati
 
 	notif, err := l.svcCtx.NotificationModel.FindOne(l.ctx, in.NotificationId)
 	if err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}
@@ -51,7 +51,7 @@ func (l *DeleteNotificationLogic) DeleteNotification(in *social.DeleteNotificati
 	}
 
 	if err := l.svcCtx.NotificationModel.Delete(l.ctx, in.NotificationId); err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}

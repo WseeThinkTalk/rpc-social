@@ -42,7 +42,7 @@ func (l *DeleteReplyLogic) DeleteReply(in *social.DeleteReplyRequest) (resp *soc
 
 	reply, err := l.svcCtx.ReplyModel.FindOne(l.ctx, in.ReplyId)
 	if err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}
@@ -66,12 +66,12 @@ func (l *DeleteReplyLogic) DeleteReply(in *social.DeleteReplyRequest) (resp *soc
 	if l.svcCtx.KqPusherClient != nil {
 		data, err := json.Marshal(msg)
 		if err != nil {
-			resp.Code = 500
+			resp.Code = int64(code.ServerErr.Code())
 			resp.Msg = err.Error()
 			return resp, nil
 		}
 		if err := l.svcCtx.KqPusherClient.Push(l.ctx, string(data)); err != nil {
-			resp.Code = 500
+			resp.Code = int64(code.ServerErr.Code())
 			resp.Msg = err.Error()
 			return resp, nil
 		}

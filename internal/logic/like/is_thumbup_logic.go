@@ -1,6 +1,7 @@
 package likelogic
 
 import (
+	"rpc-social/pkg/code"
 	"context"
 
 	model "rpc-social/internal/model/like"
@@ -31,7 +32,7 @@ func (l *IsThumbupLogic) IsThumbup(in *social.IsThumbupRequest) (resp *social.Is
 
 	record, err := l.svcCtx.LikeRecordModel.FindOneByBizIdObjIdUserId(l.ctx, in.BizId, in.TargetId, in.UserId)
 	if err != nil && err != model.ErrNotFound {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}

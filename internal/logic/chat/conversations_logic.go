@@ -37,7 +37,7 @@ func (l *ConversationsLogic) Conversations(in *social.ConversationsRequest) (res
 
 	convs, err := l.svcCtx.ConversationModel.FindByUserId(l.ctx, in.UserId, in.Cursor, in.PageSize+1)
 	if err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}

@@ -57,12 +57,12 @@ func (l *SendMessageLogic) SendMessage(in *social.SendMessageRequest) (resp *soc
 	if l.svcCtx.KqPusherClient != nil {
 		data, err := json.Marshal(msg)
 		if err != nil {
-			resp.Code = 500
+			resp.Code = int64(code.ServerErr.Code())
 			resp.Msg = err.Error()
 			return resp, nil
 		}
 		if err := l.svcCtx.KqPusherClient.Push(l.ctx, string(data)); err != nil {
-			resp.Code = 500
+			resp.Code = int64(code.ServerErr.Code())
 			resp.Msg = err.Error()
 			return resp, nil
 		}

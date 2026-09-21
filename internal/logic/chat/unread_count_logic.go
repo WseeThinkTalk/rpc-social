@@ -32,7 +32,7 @@ func (l *UnreadCountLogic) UnreadCount(in *social.ChatUnreadCountRequest) (resp 
 
 	total, err := l.svcCtx.ConversationModel.CountUnread(l.ctx, in.UserId)
 	if err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}

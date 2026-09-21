@@ -47,7 +47,7 @@ func (l *IsConcernedLogic) IsConcerned(in *social.IsConcernedRequest) (resp *soc
 
 	record, err := l.svcCtx.ConcernedRecordModel.FindByBizIDObjIDUserID(l.ctx, in.BizId, in.ObjId, in.UserId)
 	if err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}

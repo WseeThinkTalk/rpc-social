@@ -1,6 +1,7 @@
 package likelogic
 
 import (
+	"rpc-social/pkg/code"
 	"context"
 	"encoding/json"
 
@@ -41,13 +42,13 @@ func (l *ThumbupLogic) Thumbup(in *social.ThumbupRequest) (resp *social.ThumbupR
 	if l.svcCtx.KqPusherClient != nil {
 		data, err := json.Marshal(msg)
 		if err != nil {
-			resp.Code = 500
+			resp.Code = int64(code.ServerErr.Code())
 			resp.Msg = err.Error()
 			return resp, nil
 		}
 
 		if err := l.svcCtx.KqPusherClient.Push(l.ctx, string(data)); err != nil {
-			resp.Code = 500
+			resp.Code = int64(code.ServerErr.Code())
 			resp.Msg = err.Error()
 			return resp, nil
 		}

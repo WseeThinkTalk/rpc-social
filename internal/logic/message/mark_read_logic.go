@@ -40,7 +40,7 @@ func (l *MarkReadLogic) MarkRead(in *social.MarkReadRequest) (resp *social.MarkR
 
 	notif, err := l.svcCtx.NotificationModel.FindOne(l.ctx, in.NotificationId)
 	if err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}
@@ -52,7 +52,7 @@ func (l *MarkReadLogic) MarkRead(in *social.MarkReadRequest) (resp *social.MarkR
 
 	err = l.svcCtx.NotificationModel.UpdateRead(l.ctx, in.NotificationId, in.UserId)
 	if err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}

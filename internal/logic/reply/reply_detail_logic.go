@@ -37,7 +37,7 @@ func (l *ReplyDetailLogic) ReplyDetail(in *social.ReplyDetailRequest) (resp *soc
 
 	reply, err := l.svcCtx.ReplyModel.FindOne(l.ctx, in.ReplyId)
 	if err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}

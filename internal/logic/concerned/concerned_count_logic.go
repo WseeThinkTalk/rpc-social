@@ -43,7 +43,7 @@ func (l *ConcernedCountLogic) ConcernedCount(in *social.ConcernedCountRequest) (
 		userId := -in.ObjId
 		count, err := l.svcCtx.ConcernedRecordModel.CountByUserId(l.ctx, userId, in.BizId)
 		if err != nil {
-			resp.Code = 500
+			resp.Code = int64(code.ServerErr.Code())
 			resp.Msg = err.Error()
 			return resp, nil
 		}
@@ -53,7 +53,7 @@ func (l *ConcernedCountLogic) ConcernedCount(in *social.ConcernedCountRequest) (
 
 	count, err := l.svcCtx.ConcernedCountModel.FindByBizIDAndObjID(l.ctx, in.BizId, in.ObjId)
 	if err != nil {
-		resp.Code = 500
+		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}
