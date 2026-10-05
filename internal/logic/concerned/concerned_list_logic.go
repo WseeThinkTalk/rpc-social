@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"sync"
 
 	"rpc-social/internal/svc"
 	types "rpc-social/internal/types/concerned"
@@ -52,19 +53,65 @@ func (l *ConcernedListLogic) ConcernedList(in *social.ConcernedListRequest) (res
 	// 优先尝试读取推拉结合 Feed 流
 	if l.svcCtx.BizRedis != nil && in.BizId == "feed" {
 		inboxKey := fmt.Sprintf("biz#feed#inbox:%d", in.UserId)
-		pairs, rerr := l.svcCtx.BizRedis.ZrevrangebyscoreWithScoresAndLimitCtx(
-			l.ctx, inboxKey, 0, in.Cursor, 0, int(in.PageSize)+1)
-		if rerr == nil && len(pairs) > 0 {
-			var inboxItems []*feed.FeedItem
-			for _, pair := range pairs {
-				objId, _ := strconv.ParseInt(pair.Key, 10, 64)
-				inboxItems = append(inboxItems, &feed.FeedItem{
-					ArticleID:   objId,
-					PublishTime: pair.Score,
-				})
+		var (
+			allStreams [][]*feed.FeedItem
+			mu         sync.Mutex
+			wg         sync.WaitGroup
+		)
+
+		// 1. 读取自身收件箱流 (Inbox)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			pairs, rerr := l.svcCtx.BizRedis.ZrevrangebyscoreWithScoresAndLimitCtx(
+				l.ctx, inboxKey, 0, in.Cursor, 0, int(in.PageSize)+1)
+			if rerr == nil && len(pairs) > 0 {
+				items := make([]*feed.FeedItem, 0, len(pairs))
+				for _, pair := range pairs {
+					objId, _ := strconv.ParseInt(pair.Key, 10, 64)
+					items = append(items, &feed.FeedItem{
+						ArticleID:   objId,
+						PublishTime: pair.Score,
+					})
+				}
+				mu.Lock()
+				allStreams = append(allStreams, items)
+				mu.Unlock()
 			}
+		}()
+
+		// 2. 并行拉取所关注博主中大 V 的发件箱流 (Outbox)
+		followed, _ := l.svcCtx.ConcernedRecordModel.FindByUserId(l.ctx, in.UserId, "user", 0, 50)
+		for _, f := range followed {
+			authorID := f.ObjID
+			wg.Add(1)
+			go func(aId int64) {
+				defer wg.Done()
+				outboxKey := fmt.Sprintf("biz#feed#outbox:%d", aId)
+				pairs, rerr := l.svcCtx.BizRedis.ZrevrangebyscoreWithScoresAndLimitCtx(
+					l.ctx, outboxKey, 0, in.Cursor, 0, int(in.PageSize)+1)
+				if rerr == nil && len(pairs) > 0 {
+					items := make([]*feed.FeedItem, 0, len(pairs))
+					for _, pair := range pairs {
+						objId, _ := strconv.ParseInt(pair.Key, 10, 64)
+						items = append(items, &feed.FeedItem{
+							ArticleID:   objId,
+							AuthorID:    aId,
+							PublishTime: pair.Score,
+						})
+					}
+					mu.Lock()
+					allStreams = append(allStreams, items)
+					mu.Unlock()
+				}
+			}(authorID)
+		}
+
+		wg.Wait()
+
+		if len(allStreams) > 0 {
 			merger := feed.NewFeedMerger()
-			merged := merger.MergeMultiStreams([][]*feed.FeedItem{inboxItems}, int(in.PageSize))
+			merged := merger.MergeMultiStreams(allStreams, int(in.PageSize))
 			for _, item := range merged {
 				resp.Data.Items = append(resp.Data.Items, &social.ConcernedItem{
 					Id:         item.ArticleID,
@@ -76,7 +123,7 @@ func (l *ConcernedListLogic) ConcernedList(in *social.ConcernedListRequest) (res
 			if len(merged) > 0 {
 				resp.Data.Cursor = merged[len(merged)-1].PublishTime
 			}
-			resp.Data.IsEnd = len(pairs) <= int(in.PageSize)
+			resp.Data.IsEnd = len(merged) < int(in.PageSize)
 			return resp, nil
 		}
 	}
