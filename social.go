@@ -62,7 +62,7 @@ func main() {
 	s.Start()
 }
 
-// registerServer 注册 RPC 服务 (CYZX风格)
+// registerServer 注册 RPC 服务
 func registerServer(ctx *svc.ServiceContext, grpcServer grpc.ServiceRegistrar) {
 	social.RegisterLikeServer(grpcServer, likeserver.NewLikeServer(ctx))
 	social.RegisterConcernedServer(grpcServer, concernedserver.NewConcernedServer(ctx))
@@ -84,3 +84,4 @@ func unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		return resp, err
 	}
 }
+
