@@ -3,15 +3,20 @@ package replylogic
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"time"
 
 	"rpc-social/internal/svc"
 	types "rpc-social/internal/types/reply"
 	"rpc-social/pkg/code"
+	"rpc-social/pkg/guard"
 	"rpc-social/pkg/sensitive"
 	"rpc-social/social"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
+
+var replyGuard = guard.NewMemoryGuard(2 * time.Second)
 
 type CreateReplyLogic struct {
 	ctx    context.Context
@@ -54,6 +59,14 @@ func (l *CreateReplyLogic) CreateReply(in *social.CreateReplyRequest) (resp *soc
 	if len(in.Content) > 5000 {
 		resp.Code = int64(code.ContentTooLong.Code())
 		resp.Msg = code.ContentTooLong.Message()
+		return resp, nil
+	}
+
+	// 频控检查（同一用户 2 秒内限发 1 条评论）
+	guardKey := fmt.Sprintf("%d:create_reply", in.ReplyUserId)
+	if !replyGuard.Acquire(guardKey) {
+		resp.Code = int64(code.FrequentOperation.Code())
+		resp.Msg = code.FrequentOperation.Message()
 		return resp, nil
 	}
 
