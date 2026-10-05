@@ -26,12 +26,14 @@ func NewThumbupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ThumbupLo
 	}
 }
 
+// Thumbup 点赞或取消点赞
 func (l *ThumbupLogic) Thumbup(in *social.ThumbupRequest) (resp *social.ThumbupResponse, err error) {
 	resp = new(social.ThumbupResponse)
 	resp.Data = new(social.ThumbupData)
 	resp.Data.BizId = in.BizId
 	resp.Data.ObjId = in.ObjId
 
+	// 构造点赞消息
 	msg := &types.ThumbupMsg{
 		BizId:    in.BizId,
 		ObjId:    in.ObjId,
@@ -39,6 +41,7 @@ func (l *ThumbupLogic) Thumbup(in *social.ThumbupRequest) (resp *social.ThumbupR
 		LikeType: in.LikeType,
 	}
 
+	// 异步投递到消息队列
 	if l.svcCtx.KqPusherClient != nil {
 		data, err := json.Marshal(msg)
 		if err != nil {

@@ -7,6 +7,7 @@ import (
 	"rpc-social/internal/svc"
 	types "rpc-social/internal/types/reply"
 	"rpc-social/pkg/code"
+	"rpc-social/pkg/sensitive"
 	"rpc-social/social"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -53,6 +54,14 @@ func (l *CreateReplyLogic) CreateReply(in *social.CreateReplyRequest) (resp *soc
 	if len(in.Content) > 5000 {
 		resp.Code = int64(code.ContentTooLong.Code())
 		resp.Msg = code.ContentTooLong.Message()
+		return resp, nil
+	}
+
+	// 敏感词检查
+	defaultFilter := sensitive.NewFilter([]string{"涉黄", "涉暴", "赌博", "违禁"})
+	if defaultFilter.IsSensitive(in.Content) {
+		resp.Code = int64(code.ReplyContainsSensitiveWord.Code())
+		resp.Msg = code.ReplyContainsSensitiveWord.Message()
 		return resp, nil
 	}
 

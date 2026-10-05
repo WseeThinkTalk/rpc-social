@@ -71,33 +71,30 @@ func (l *ReplyListLogic) ReplyList(in *social.ReplyListRequest) (resp *social.Re
 		return resp, nil
 	}
 
-	// 2. 收集根评论 ID, 查询子回复
+	// 2. 批量拉取根评论对应的子回复（限制返回条数）
 	rootIds := make([]int64, len(roots))
 	for i, v := range roots {
 		rootIds[i] = v.ID
 	}
-	subReplies, err := l.svcCtx.ReplyModel.FindByParentIDs(l.ctx, rootIds)
+	subReplies, err := l.svcCtx.ReplyModel.FindTopSubRepliesByParentIDs(l.ctx, rootIds, types.MaxSubReplyCount)
 	if err != nil {
 		resp.Code = int64(code.ServerErr.Code())
 		resp.Msg = err.Error()
 		return resp, nil
 	}
 
-	// 3. 构建 parentId → subReplies 映射
+	// 3. 按 parentId 分组子回复
 	subMap := make(map[int64][]*social.ReplyItem)
 	for _, v := range subReplies {
 		item := l.toReplyItem(v)
 		subMap[v.ParentID] = append(subMap[v.ParentID], item)
 	}
 
-	// 4. 组装返回评论列表并挂载子评论
+	// 4. 组装评论列表并绑定子回复
 	items := make([]*social.ReplyItem, 0, len(roots))
 	for _, v := range roots {
 		rootItem := l.toReplyItem(v)
 		if subs, ok := subMap[v.ID]; ok {
-			if len(subs) > types.MaxSubReplyCount {
-				subs = subs[:types.MaxSubReplyCount]
-			}
 			rootItem.SubReplies = subs
 		}
 		items = append(items, rootItem)

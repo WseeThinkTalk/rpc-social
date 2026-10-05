@@ -31,7 +31,8 @@ var (
 	ReplyContentEmpty   = xcode.New(60004, "评论内容不能为空")
 	ReplyContentTooLong = xcode.New(60005, "评论内容过长")
 	ReplyNotFound       = xcode.New(60006, "评论不存在")
-	CannotDeleteReply   = xcode.New(60007, "无权删除此评论")
+	CannotDeleteReply          = xcode.New(60007, "无权删除此评论")
+	ReplyContainsSensitiveWord = xcode.New(60008, "评论内容包含违规敏感词汇")
 
 	// Common Aliases
 	UserIdEmpty     = ChatUserIdEmpty
