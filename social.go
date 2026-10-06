@@ -12,11 +12,10 @@ import (
 	messageserver "rpc-social/internal/server/message"
 	replyserver "rpc-social/internal/server/reply"
 	"rpc-social/internal/svc"
-	"rpc-social/pkg/env"
+	"rpc-social/pkg/lib/etcdx"
 	"rpc-social/pkg/lib/zapx"
 	"rpc-social/social"
 
-	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -24,20 +23,25 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var configFile = flag.String("f", "etc/social.yaml", "the config file")
-
-func main() {
-	flag.Parse()
-
-	env.LoadEnv()
-
+func runRemoteConfig() *config.Config {
 	var c config.Config
-	conf.MustLoad(*configFile, &c, conf.UseEnv())
+	etcdx.MustLoadRemoteConfig("/thinktalk/config/social.rpc", &c)
 	if c.DB.DataSource == "" {
 		c.DB.DataSource = c.DataSource
 	}
 	if c.Mysql.DataSource == "" {
 		c.Mysql.DataSource = c.DataSource
+	}
+	return &c
+}
+
+func main() {
+	flag.Parse()
+
+	// 从 Etcd 配置中心拉取远程配置 (Fail-Fast)
+	c := runRemoteConfig()
+	if c == nil {
+		return
 	}
 
 	// init logger
@@ -46,7 +50,7 @@ func main() {
 		logx.SetWriter(writer)
 	}
 
-	ctx := svc.NewServiceContext(c)
+	ctx := svc.NewServiceContext(*c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		registerServer(ctx, grpcServer)
