@@ -68,11 +68,38 @@ func main() {
 
 // registerServer 注册 RPC 服务
 func registerServer(ctx *svc.ServiceContext, grpcServer grpc.ServiceRegistrar) {
-	social.RegisterLikeServer(grpcServer, likeserver.NewLikeServer(ctx))
-	social.RegisterConcernedServer(grpcServer, concernedserver.NewConcernedServer(ctx))
-	social.RegisterReplyServer(grpcServer, replyserver.NewReplyServer(ctx))
-	social.RegisterMessageServer(grpcServer, messageserver.NewMessageServer(ctx))
-	social.RegisterChatServer(grpcServer, chatserver.NewChatServer(ctx))
+	likeSrv := likeserver.NewLikeServer(ctx)
+	concernedSrv := concernedserver.NewConcernedServer(ctx)
+	replySrv := replyserver.NewReplyServer(ctx)
+	messageSrv := messageserver.NewMessageServer(ctx)
+	chatSrv := chatserver.NewChatServer(ctx)
+
+	social.RegisterLikeServer(grpcServer, likeSrv)
+	social.RegisterConcernedServer(grpcServer, concernedSrv)
+	social.RegisterReplyServer(grpcServer, replySrv)
+	social.RegisterMessageServer(grpcServer, messageSrv)
+	social.RegisterChatServer(grpcServer, chatSrv)
+
+	// 兼容旧版客户端 (api-thinktalk) 调用的服务命名空间
+	likeDesc := social.Like_ServiceDesc
+	likeDesc.ServiceName = "service.Like"
+	grpcServer.RegisterService(&likeDesc, likeSrv)
+
+	concernedDesc := social.Concerned_ServiceDesc
+	concernedDesc.ServiceName = "service.Concerned"
+	grpcServer.RegisterService(&concernedDesc, concernedSrv)
+
+	replyDesc := social.Reply_ServiceDesc
+	replyDesc.ServiceName = "service.Reply"
+	grpcServer.RegisterService(&replyDesc, replySrv)
+
+	messageDesc := social.Message_ServiceDesc
+	messageDesc.ServiceName = "service.Message"
+	grpcServer.RegisterService(&messageDesc, messageSrv)
+
+	chatDesc := social.Chat_ServiceDesc
+	chatDesc.ServiceName = "service.Chat"
+	grpcServer.RegisterService(&chatDesc, chatSrv)
 }
 
 // unaryServerInterceptor grpc 拦截器
