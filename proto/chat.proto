@@ -1,97 +1,108 @@
 syntax = "proto3";
 
-package service;
-option go_package="./pb";
+package social;
+option go_package = "api-thinktalk/client/chat/pb;pb";
 
 service Chat {
-  // 发送消息
-  rpc SendMessage (SendMessageRequest) returns (SendMessageResponse);
-  // 会话列表
-  rpc Conversations (ConversationsRequest) returns (ConversationsResponse);
-  // 消息列表
-  rpc Messages (MessagesRequest) returns (MessagesResponse);
-  // 标记已读
-  rpc MarkRead (MarkReadRequest) returns (MarkReadResponse);
-  // 未读计数
-  rpc UnreadCount (UnreadCountRequest) returns (UnreadCountResponse);
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+  rpc Conversations(ConversationsRequest) returns (ConversationsResponse);
+  rpc Messages(MessagesRequest) returns (MessagesResponse);
+  rpc MarkRead(ChatMarkReadRequest) returns (ChatMarkReadResponse);
+  rpc UnreadCount(ChatUnreadCountRequest) returns (ChatUnreadCountResponse);
 }
 
-// -------------------- 发送消息 --------------------
-
 message SendMessageRequest {
-  int64 senderId = 1;   // 发送者
-  int64 receiverId = 2; // 接收者
-  string content = 3;   // 消息内容
-  int32 msgType = 4;    // 消息类型 0:文本 1:图片
+  int64 senderId = 1;
+  int64 receiverId = 2;
+  string content = 3;
+  int32 msgType = 4;
+}
+
+message SendMessageData {
+  int64 messageId = 1;
 }
 
 message SendMessageResponse {
-  int64 messageId = 1; // 消息ID
+  int64 code = 1;
+  string msg = 2;
+  SendMessageData data = 3;
 }
 
-// -------------------- 会话列表 --------------------
-
 message ConversationsRequest {
-  int64 userId = 1;    // 用户ID
-  int64 cursor = 2;    // 游标
-  int64 pageSize = 3;  // 页大小
+  int64 userId = 1;
+  int64 cursor = 2;
+  int64 pageSize = 3;
 }
 
 message ConversationItem {
-  int64 id = 1;              // 会话ID
-  int64 targetUserId = 2;    // 对方用户ID
-  string lastMessage = 3;    // 最后一条消息
-  int64 lastMessageTime = 4; // 最后消息时间
-  int64 unreadCount = 5;     // 未读数
+  int64 id = 1;
+  int64 targetUserId = 2;
+  string lastMessage = 3;
+  int64 lastMessageTime = 4;
+  int64 unreadCount = 5;
 }
 
-message ConversationsResponse {
+message ConversationsData {
   repeated ConversationItem items = 1;
   int64 cursor = 2;
   bool isEnd = 3;
 }
 
-// -------------------- 消息列表 --------------------
+message ConversationsResponse {
+  int64 code = 1;
+  string msg = 2;
+  ConversationsData data = 3;
+}
 
 message MessagesRequest {
-  int64 conversationId = 1; // 会话ID
-  int64 cursor = 2;         // 游标
-  int64 pageSize = 3;       // 页大小
+  int64 conversationId = 1;
+  int64 cursor = 2;
+  int64 pageSize = 3;
 }
 
 message MessageItem {
-  int64 id = 1;             // 消息ID
-  int64 conversationId = 2; // 会话ID
-  int64 senderId = 3;       // 发送者ID
-  int64 receiverId = 4;     // 接收者ID
-  string content = 5;       // 内容
-  int32 msgType = 6;        // 消息类型
-  bool isRead = 7;          // 是否已读
-  int64 createTime = 8;     // 创建时间
+  int64 id = 1;
+  int64 conversationId = 2;
+  int64 senderId = 3;
+  int64 receiverId = 4;
+  string content = 5;
+  int32 msgType = 6;
+  bool isRead = 7;
+  int64 createTime = 8;
 }
 
-message MessagesResponse {
+message MessagesData {
   repeated MessageItem items = 1;
   int64 cursor = 2;
   bool isEnd = 3;
 }
 
-// -------------------- 标记已读 --------------------
-
-message MarkReadRequest {
-  int64 userId = 1;         // 用户ID
-  int64 conversationId = 2; // 会话ID
+message MessagesResponse {
+  int64 code = 1;
+  string msg = 2;
+  MessagesData data = 3;
 }
 
-message MarkReadResponse {
+message ChatMarkReadRequest {
+  int64 userId = 1;
+  int64 conversationId = 2;
 }
 
-// -------------------- 未读计数 --------------------
-
-message UnreadCountRequest {
-  int64 userId = 1; // 用户ID
+message ChatMarkReadResponse {
+  int64 code = 1;
+  string msg = 2;
 }
 
-message UnreadCountResponse {
-  int64 total = 1; // 总未读数
+message ChatUnreadCountRequest {
+  int64 userId = 1;
+}
+
+message ChatUnreadCountData {
+  int64 total = 1;
+}
+
+message ChatUnreadCountResponse {
+  int64 code = 1;
+  string msg = 2;
+  ChatUnreadCountData data = 3;
 }
