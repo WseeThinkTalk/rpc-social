@@ -26,12 +26,6 @@ import (
 func runRemoteConfig() *config.Config {
 	var c config.Config
 	etcdx.MustLoadRemoteConfig("/thinktalk/config/social.rpc", &c)
-	if c.DB.DataSource == "" {
-		c.DB.DataSource = c.DataSource
-	}
-	if c.Mysql.DataSource == "" {
-		c.Mysql.DataSource = c.DataSource
-	}
 	return &c
 }
 
